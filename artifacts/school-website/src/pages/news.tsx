@@ -32,12 +32,14 @@ export default function News() {
     limit: 12,
   });
 
+  const overriddenSlugs = new Set(apiNews.map(a => a.slug).filter(Boolean));
+
   const allItems: NewsItem[] = [
     ...apiNews.filter(a =>
       (!debouncedSearch || a.title.toLowerCase().includes(debouncedSearch.toLowerCase()) || a.excerpt.toLowerCase().includes(debouncedSearch.toLowerCase())) &&
       (!category || a.category === category)
     ),
-    ...staticData.items,
+    ...staticData.items.filter(s => !overriddenSlugs.has(s.slug)),
   ];
 
   const isLoading = false;

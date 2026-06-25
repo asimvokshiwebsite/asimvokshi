@@ -257,30 +257,50 @@ function NewsSection() {
             </div>
           )}
 
-          {/* Static (built-in) news — read-only */}
+          {/* Static (built-in) news — editable via override */}
           <div className="space-y-3">
             <div className="flex items-center gap-3">
               <FileText size={13} className="text-white/30" />
-              <span className="text-[10px] uppercase tracking-widest font-bold text-white/30">Lajme Statike (të integruara në kod)</span>
+              <span className="text-[10px] uppercase tracking-widest font-bold text-white/30">Lajme Statike (klikoni Ndrysho për të modifikuar)</span>
               <div className="h-px flex-1 bg-white/5" />
             </div>
-            {staticNewsItems.map(item => (
-              <div key={item.id}
-                className="flex items-center gap-4 bg-white/[0.02] border border-white/5 rounded-xl px-4 py-3 opacity-60">
-                {item.imageUrl && (
-                  <img src={item.imageUrl} alt="" className="w-12 h-12 object-cover rounded-lg flex-shrink-0 opacity-60" />
-                )}
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-2 mb-0.5">
-                    <span className="text-[10px] px-2 py-0.5 rounded bg-white/5 text-white/40 uppercase tracking-wider font-bold">{item.category}</span>
-                    {item.featured && <span className="text-[10px] text-amber-400/50 font-bold uppercase tracking-wider">★ Spikatur</span>}
+            {staticNewsItems.map(staticItem => {
+              const override = items.find(i => i.slug === staticItem.slug);
+              const isOverridden = !!override;
+              return (
+                <div key={staticItem.id}
+                  className={`flex items-center gap-4 border rounded-xl px-4 py-3 transition-colors ${isOverridden ? "bg-amber-400/5 border-amber-400/15" : "bg-white/[0.02] border-white/5"}`}>
+                  {(override?.imageUrl ?? staticItem.imageUrl) && (
+                    <img src={(override?.imageUrl ?? staticItem.imageUrl)!} alt=""
+                      className="w-12 h-12 object-cover rounded-lg flex-shrink-0 opacity-80" />
+                  )}
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2 mb-0.5">
+                      <span className="text-[10px] px-2 py-0.5 rounded bg-white/5 text-white/40 uppercase tracking-wider font-bold">
+                        {override?.category ?? staticItem.category}
+                      </span>
+                      {isOverridden && (
+                        <span className="text-[10px] text-amber-400 font-bold uppercase tracking-wider">● E modifikuar</span>
+                      )}
+                    </div>
+                    <p className="text-white/80 text-sm font-semibold truncate">{override?.title ?? staticItem.title}</p>
+                    <p className="text-white/25 text-xs">{new Date(override?.publishedAt ?? staticItem.publishedAt).toLocaleDateString("sq-AL")}</p>
                   </div>
-                  <p className="text-white/70 text-sm font-semibold truncate">{item.title}</p>
-                  <p className="text-white/25 text-xs">{new Date(item.publishedAt).toLocaleDateString("sq-AL")}</p>
+                  <button
+                    onClick={() => {
+                      if (override) {
+                        startEdit(override);
+                      } else {
+                        setEditing({ ...staticItem, imageUrl: staticItem.imageUrl ?? "" });
+                        setEditingId(null);
+                      }
+                    }}
+                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white/5 hover:bg-amber-400/10 hover:text-amber-400 text-white/40 text-xs font-bold transition-colors flex-shrink-0">
+                    <Pencil size={12} /> Ndrysho
+                  </button>
                 </div>
-                <span className="text-[10px] text-white/20 font-bold uppercase tracking-wider flex-shrink-0">Statike</span>
-              </div>
-            ))}
+              );
+            })}
           </div>
         </div>
       )}
