@@ -67,7 +67,6 @@ export function Navbar() {
         animate={{ opacity: 1 }}
         transition={{ duration: 0.3 }}
       />
-
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-14">
           {/* Logo Brand */}
@@ -102,9 +101,7 @@ export function Navbar() {
                 }`}
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
-              >
-                Ballina
-              </motion.div>
+              >Homepage</motion.div>
             </Link>
 
             {/* Dropdown 1: Shkolla */}
@@ -265,7 +262,6 @@ export function Navbar() {
           </div>
         </div>
       </div>
-
       {/* Mobile Drawer Overlay */}
       <AnimatePresence>
         {mobileOpen && (
