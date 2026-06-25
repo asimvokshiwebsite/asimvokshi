@@ -103,73 +103,7 @@ const daysAgo = (days: number) => {
   return d.toISOString();
 };
 
-export const newsItems: NewsItem[] = [
-  {
-    id: 5,
-    slug: "zilja-e-fundit-2026",
-    title: "Zilja e Fundit: Festimi i Maturantëve 2026",
-    excerpt:
-      "Gëzimi, emocionet dhe kujtimet e paharrueshme të maturantëve tanë në ceremoninë tradicionale të 'Ziljes së Fundit'.",
-    content:
-      "Sot u mbajt ceremonia tradicionale dhe emocionuese e 'Ziljes së Fundit' për maturantët e vitit 2026 të Shkollës së Mesme me Orientim Gjuhësor 'Asim Vokshi'.\n\nNë prani të mësuesve, prindërve dhe miqve, maturantët festuan përfundimin e këtij kapitulli të rëndësishëm të jetës së tyre me këngë, kujtime të bukura dhe premtime për të ardhmen. Shkolla u mbush me ngjyra, balona dhe përqafime të ngrohta, duke shënuar një ditë që do të mbetet gjatë në kujtesën e secilit prej nesh. Suksese të gjithë maturantëve në rrugëtimin e tyre të ri!",
-    category: "Aktivitete",
-    imageUrl: siteImages.last_bell,
-    publishedAt: daysAgo(0),
-    featured: true,
-  },
-  {
-    id: 1,
-    slug: "rikonstruksioni-eu4schools",
-    title: "Rikonstruksioni i plotë i godinës me mbështetjen e EU4Schools",
-    excerpt:
-      "Në shkurt 2024 përfundoi rikonstruksioni i plotë i godinës sonë, financuar nga Bashkimi Europian (BE) dhe zbatuar nga UNDP.",
-    content:
-      "Në shkurt 2024 përfundoi rikonstruksioni i plotë i godinës së Shkollës së Mesme me Orientim Gjuhësor 'Asim Vokshi' me mbështetjen e programit EU4Schools, financuar nga BE-ja dhe zbatuar nga UNDP.\n\nSot, shkolla është e pajisur me laboratorë modernë, klasa me tabela interaktive e projektorë, bibliotekë dhe mjedise sportive, duke ofruar kushte bashkëkohore për një proces mësimor më cilësor për të gjithë nxënësit. Ky projekt transformoi plotësisht mjediset tona, duke sjellë standardet më të larta europiane direkt në klasat tona.",
-    category: "Infrastrukturë",
-    imageUrl: siteImages.building_front,
-    publishedAt: daysAgo(2),
-    featured: false,
-  },
-  {
-    id: 2,
-    slug: "misioni-i-shkolles",
-    title: "Misioni i shkollës: Formimi akademik dhe kulturor i shumë brezave",
-    excerpt:
-      "Themeluar më 15 shtator 1965, shkolla jonë ka luajtur një rol të rëndësishëm në arsimin gjuhësor të mesëm në Shqipëri.",
-    content:
-      "Shkolla e Mesme me Orientim Gjuhësor 'Asim Vokshi' në Tiranë është një institucion arsimor me histori të pasur dhe reputacion të shkëlqyer. E themeluar më 15 shtator 1965 dhe emërtuar në nder të Asim Vokshit, një figurë e shquar historike dhe patriotike, shkolla jonë ka luajtur një rol të rëndësishëm në formimin akademik e kulturor të shumë brezave.\n\nGjatë këtyre viteve, shkolla është dalluar për përgatitjen cilësore të nxënësve në fusha të ndryshme dhe ka qenë një pikë referimi në metodat mësimore, si dhe në organizimin e aktiviteteve kulturore e sportive.",
-    category: "Histori",
-    imageUrl: siteImages.teachers_historical,
-    publishedAt: daysAgo(5),
-    featured: false,
-  },
-  {
-    id: 3,
-    slug: "tri-gjuhe-te-huaja",
-    title: "Plani mësimor: Mësimi i tri gjuhëve të huaja",
-    excerpt:
-      "Plani mësimor u ndryshua për t'u dhënë nxënësve mundësinë të mësojnë tri gjuhë të huaja njëkohësisht.",
-    content:
-      "Në vitin 2004 u ndryshua plani mësimor në shkollën tonë, duke u dhënë nxënësve mundësinë të mësonin tri gjuhë të huaja dhe duke përfshirë lëndë të reja, si informatika dhe psikologjia.\n\nKy ndryshim e ktheu shkollën në një qendër të vërtetë shumëgjuhëshe, ku nxënësit fitojnë kompetenca të jashtëzakonshme komunikuese në gjuhë të ndryshme europiane dhe botërore, duke u hapur atyre rrugën drejt karrierave ndërkombëtare.",
-    category: "Akademike",
-    imageUrl: siteImages.class_interactive,
-    publishedAt: daysAgo(4),
-    featured: false,
-  },
-  {
-    id: 4,
-    slug: "seksionet-dygjuheshe",
-    title: "Seksionet dygjuhëshe italisht-shqip dhe frëngjisht-shqip",
-    excerpt:
-      "Hapur në vitin 1998, seksionet tona dygjuhëshe ofrojnë integrim të plotë kulturor dhe gjuhësor me standarde europiane.",
-    content:
-      "Në vitin 1998 u hapën seksionet dygjuhëshe italisht-shqip dhe frëngjisht-shqip në shkollën tonë. Këto seksione përfaqësojnë një urë të rëndësishme lidhëse me kulturat përkatëse dhe ofrojnë mësimdhënie të lëndëve të ndryshme direkt në gjuhët e huaja.\n\nSeksionet tona mbështeten ngushtë nga partnerët tanë diplomatikë, duke përfshirë Ambasadën Franceze dhe Ambasadën Italiane, duke u ofruar nxënësve certifikime të njohura ndërkombëtarisht.",
-    category: "Projekte",
-    imageUrl: siteImages.students_group1,
-    publishedAt: daysAgo(6),
-    featured: false,
-  },
-];
+export const newsItems: NewsItem[] = [];
 
 export const staffItems: StaffMember[] = [
   // Drejtoria
