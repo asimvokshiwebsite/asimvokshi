@@ -1,3 +1,4 @@
+import { useState, useEffect } from "react";
 import { MapPin, Clock, Star } from "lucide-react";
 import { PageTransition } from "@/components/page-transition";
 import { motion } from "framer-motion";
@@ -6,6 +7,7 @@ import { AnimateOnView } from "@/components/animate-on-view";
 type EventType = "akademike" | "kulturore" | "nderkombetare" | "shkollore";
 
 interface CalendarEvent {
+  id?: number;
   date: string;
   month: string;
   title: string;
@@ -14,6 +16,7 @@ interface CalendarEvent {
   location?: string;
   type: EventType;
   highlight?: boolean;
+  period?: string;
 }
 
 const typeConfig: Record<EventType, { color: string; label: string }> = {
@@ -23,7 +26,7 @@ const typeConfig: Record<EventType, { color: string; label: string }> = {
   shkollore: { color: "bg-emerald-500/10 text-emerald-400 border-emerald-500/20", label: "Shkollore" },
 };
 
-const monthGroups: { month: string; events: CalendarEvent[] }[] = [
+const staticMonthGroups: { month: string; events: CalendarEvent[] }[] = [
   {
     month: "Periudha e Parë",
     events: [
@@ -99,6 +102,33 @@ function EventCard({ event }: { event: CalendarEvent }) {
 }
 
 export default function Calendar() {
+  const [apiEvents, setApiEvents] = useState<CalendarEvent[]>([]);
+
+  useEffect(() => {
+    fetch("/api/events")
+      .then(r => r.json())
+      .then(data => setApiEvents(Array.isArray(data) ? data : []))
+      .catch(() => {});
+  }, []);
+
+  const PERIODS = ["Periudha e Parë", "Periudha e Dytë", "Periudha e Tretë", "Periudha e Katërt"];
+
+  const mergedGroups = staticMonthGroups.map(group => {
+    const extra = apiEvents.filter(e => (e.period ?? "Periudha e Parë") === group.month);
+    return { ...group, events: [...group.events, ...extra] };
+  });
+
+  const otherPeriods = apiEvents
+    .filter(e => e.period && !PERIODS.includes(e.period))
+    .reduce<{ month: string; events: CalendarEvent[] }[]>((acc, e) => {
+      const existing = acc.find(g => g.month === e.period);
+      if (existing) { existing.events.push(e); }
+      else { acc.push({ month: e.period!, events: [e] }); }
+      return acc;
+    }, []);
+
+  const allGroups = [...mergedGroups, ...otherPeriods];
+
   return (
     <PageTransition>
       {/* Hero Section */}
@@ -119,7 +149,7 @@ export default function Calendar() {
       {/* Calendar List with Dark Glassmorphism */}
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-24 bg-[#04090F]">
         <div className="space-y-16">
-          {monthGroups.map((group, groupIdx) => (
+          {allGroups.map((group, groupIdx) => (
             <div key={group.month} className="space-y-6">
               <AnimateOnView>
                 <div className="flex items-center gap-4">
@@ -129,7 +159,7 @@ export default function Calendar() {
               </AnimateOnView>
               <div className="space-y-4">
                 {group.events.map((event, eventIdx) => (
-                  <AnimateOnView key={event.title} delay={eventIdx * 0.05}>
+                  <AnimateOnView key={event.id ?? event.title} delay={eventIdx * 0.05}>
                     <EventCard event={event} />
                   </AnimateOnView>
                 ))}

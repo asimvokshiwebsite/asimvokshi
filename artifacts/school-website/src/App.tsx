@@ -22,6 +22,7 @@ import Calendar from "@/pages/calendar";
 import Contact from "@/pages/contact";
 import Schedule from "@/pages/schedule";
 import NotFound from "@/pages/not-found";
+import Admin from "@/pages/admin";
 
 // Components
 import { Navbar } from "@/components/navbar";
@@ -29,9 +30,7 @@ import { Footer } from "@/components/footer";
 import { SmoothScroll } from "@/components/smooth-scroll";
 import { ShaderBackground } from "@/components/shader-background";
 import { ScrollToTop } from "@/components/scroll-to-top";
-
 import { Preloader } from "@/components/preloader";
-
 
 function AnimatedRoutes() {
   const [location] = useLocation();
@@ -58,20 +57,13 @@ function AnimatedRoutes() {
     </AnimatePresence>
   );
 }
-function Router() {
-  // make sure to consider if you need authentication for certain routes
+
+function MainLayout() {
   return (
     <div className="flex min-h-screen flex-col bg-[#04090F] text-foreground transition-colors duration-300 relative overflow-hidden">
-      {/* Scroll to top automatically on route changes */}
       <ScrollToTop />
-
-      {/* Preloader on startup */}
       <Preloader />
-
-      {/* Shader background with fluid lights and film grain */}
       <ShaderBackground />
-      
-      {/* Content layout layered on top */}
       <div className="relative z-10 flex flex-col min-h-screen w-full">
         <Navbar />
         <main className="flex-1 w-full">
@@ -83,17 +75,23 @@ function Router() {
   );
 }
 
+function Router() {
+  const [location] = useLocation();
+  if (location === "/admin") return <Admin />;
+  return <MainLayout />;
+}
+
 function App() {
   return (
     <ErrorBoundary>
       <ThemeProvider defaultTheme="dark" switchable>
-          <TooltipProvider>
-            <SmoothScroll>
-              <Router />
-            </SmoothScroll>
-            <Toaster position="top-right" closeButton richColors />
-          </TooltipProvider>
-        </ThemeProvider>
+        <TooltipProvider>
+          <SmoothScroll>
+            <Router />
+          </SmoothScroll>
+          <Toaster position="top-right" closeButton richColors />
+        </TooltipProvider>
+      </ThemeProvider>
     </ErrorBoundary>
   );
 }

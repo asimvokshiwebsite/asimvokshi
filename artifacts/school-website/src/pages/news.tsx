@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { Link } from "wouter";
 import { motion } from "framer-motion";
 import { Search, ArrowRight, Filter, Calendar, BookOpen } from "lucide-react";
-import { getNewsList } from "@/content/site-content";
+import { getNewsList, type NewsItem } from "@/content/site-content";
 import { PageTransition } from "@/components/page-transition";
 import { AnimateOnView } from "@/components/animate-on-view";
 
@@ -11,25 +11,41 @@ export default function News() {
   const [debouncedSearch, setDebouncedSearch] = useState("");
   const [category, setCategory] = useState("");
   const [page, setPage] = useState(1);
+  const [apiNews, setApiNews] = useState<NewsItem[]>([]);
+
+  useEffect(() => {
+    fetch("/api/news")
+      .then(r => r.json())
+      .then(data => setApiNews(Array.isArray(data) ? data : []))
+      .catch(() => {});
+  }, []);
 
   useEffect(() => {
     const t = setTimeout(() => setDebouncedSearch(search), 500);
     return () => clearTimeout(t);
   }, [search]);
 
-  const data = getNewsList({
+  const staticData = getNewsList({
     search: debouncedSearch || undefined,
     category: category || undefined,
     page,
     limit: 12,
   });
 
+  const allItems: NewsItem[] = [
+    ...apiNews.filter(a =>
+      (!debouncedSearch || a.title.toLowerCase().includes(debouncedSearch.toLowerCase()) || a.excerpt.toLowerCase().includes(debouncedSearch.toLowerCase())) &&
+      (!category || a.category === category)
+    ),
+    ...staticData.items,
+  ];
+
   const isLoading = false;
   const isError = false;
-  const items = data.items;
-  const categories = data.categories;
-  const total = data.total;
-  const hasMore = page * 12 < total;
+  const items = allItems;
+  const categories = [...new Set([...apiNews.map(i => i.category), ...staticData.categories])];
+  const total = staticData.total + apiNews.length;
+  const hasMore = page * 12 < staticData.total;
 
   const featured = !debouncedSearch && !category && page === 1 ? items[0] : null;
   const rest = featured ? items.slice(1) : items;
