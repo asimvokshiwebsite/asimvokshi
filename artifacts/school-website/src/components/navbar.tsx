@@ -77,11 +77,10 @@ export function Navbar() {
               transition={{ type: "spring", stiffness: 400, damping: 30 }}
             >
               <motion.div 
-                className="w-10 h-10 rounded-xl glass-premium flex items-center justify-center p-1.5 group-hover:glow-red-intense transition-all duration-300 relative overflow-hidden"
-                whileHover={{ boxShadow: "0 0 30px rgba(200, 16, 46, 0.4)" }}
+                className="w-10 h-10 flex items-center justify-center"
+                whileHover={{ scale: 1.08 }}
               >
-                <div className="absolute inset-0 bg-crimson/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-                <img src={ASSET_LOGO} alt="Asim Vokshi Logo" className="w-full h-full object-contain relative z-10" />
+                <img src={ASSET_LOGO} alt="Asim Vokshi Logo" className="w-full h-full object-contain drop-shadow-lg" />
               </motion.div>
               <div className="flex flex-col">
                 <span className="font-serif font-bold text-base text-white tracking-wide leading-tight group-hover:text-amber-300 transition-colors duration-300">Asim Vokshi</span>

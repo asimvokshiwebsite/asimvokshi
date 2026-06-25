@@ -1,5 +1,5 @@
 // Uploaded school asset URLs from asimi.zip
-export const ASSET_LOGO = "/images/building_front.jpeg";
+export const ASSET_LOGO = "/images/logo.png";
 
 export const SCHOOL_IMAGES = {
   // Main building, classes, inaugurations, students
