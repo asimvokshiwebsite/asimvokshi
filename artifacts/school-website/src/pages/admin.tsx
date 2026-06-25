@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Lock, LogOut, Plus, Pencil, Trash2, X, Check, Newspaper, CalendarDays, Eye, EyeOff } from "lucide-react";
+import { Lock, LogOut, Plus, Pencil, Trash2, X, Check, Newspaper, CalendarDays, Eye, EyeOff, FileText } from "lucide-react";
+import { newsItems as staticNewsItems } from "@/content/site-content";
 
 const ADMIN_PASSWORD = "AsimVokshi2026!";
 const SESSION_KEY = "av_admin_auth";
@@ -218,36 +219,69 @@ function NewsSection() {
         <div className="space-y-3">
           {[1,2,3].map(i => <div key={i} className="h-16 bg-white/5 rounded-xl animate-pulse" />)}
         </div>
-      ) : items.length === 0 ? (
-        <div className="text-center py-12 text-white/30 text-sm">Nuk ka lajme të shtuara. Shtoni lajmin e parë!</div>
       ) : (
-        <div className="space-y-3">
-          {items.map(item => (
-            <motion.div key={item.id} layout
-              className="flex items-center gap-4 bg-[#07111F]/60 border border-white/5 rounded-xl px-4 py-3 hover:border-white/10 transition-colors">
-              {item.imageUrl && (
-                <img src={item.imageUrl} alt="" className="w-12 h-12 object-cover rounded-lg flex-shrink-0 opacity-80" />
-              )}
-              <div className="flex-1 min-w-0">
-                <div className="flex items-center gap-2 mb-0.5">
-                  <span className="text-[10px] px-2 py-0.5 rounded bg-white/10 text-white/50 uppercase tracking-wider font-bold">{item.category}</span>
-                  {item.featured && <span className="text-[10px] text-amber-400 font-bold uppercase tracking-wider">★ Spikatur</span>}
+        <div className="space-y-6">
+          {/* API-managed (dynamic) news */}
+          {items.length === 0 ? (
+            <div className="text-center py-6 text-white/30 text-sm border border-dashed border-white/10 rounded-xl">
+              Nuk ka lajme të shtuara nga paneli. Shtoni lajmin e parë!
+            </div>
+          ) : (
+            <div className="space-y-3">
+              {items.map(item => (
+                <motion.div key={item.id} layout
+                  className="flex items-center gap-4 bg-[#07111F]/60 border border-white/5 rounded-xl px-4 py-3 hover:border-white/10 transition-colors">
+                  {item.imageUrl && (
+                    <img src={item.imageUrl} alt="" className="w-12 h-12 object-cover rounded-lg flex-shrink-0 opacity-80" />
+                  )}
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2 mb-0.5">
+                      <span className="text-[10px] px-2 py-0.5 rounded bg-white/10 text-white/50 uppercase tracking-wider font-bold">{item.category}</span>
+                      {item.featured && <span className="text-[10px] text-amber-400 font-bold uppercase tracking-wider">★ Spikatur</span>}
+                    </div>
+                    <p className="text-white text-sm font-semibold truncate">{item.title}</p>
+                    <p className="text-white/30 text-xs">{new Date(item.publishedAt).toLocaleDateString("sq-AL")}</p>
+                  </div>
+                  <div className="flex gap-2 flex-shrink-0">
+                    <button onClick={() => startEdit(item)}
+                      className="p-2 rounded-lg bg-white/5 hover:bg-amber-400/10 hover:text-amber-400 text-white/50 transition-colors">
+                      <Pencil size={14} />
+                    </button>
+                    <button onClick={() => del(item.id)}
+                      className="p-2 rounded-lg bg-white/5 hover:bg-red-500/10 hover:text-red-400 text-white/50 transition-colors">
+                      <Trash2 size={14} />
+                    </button>
+                  </div>
+                </motion.div>
+              ))}
+            </div>
+          )}
+
+          {/* Static (built-in) news — read-only */}
+          <div className="space-y-3">
+            <div className="flex items-center gap-3">
+              <FileText size={13} className="text-white/30" />
+              <span className="text-[10px] uppercase tracking-widest font-bold text-white/30">Lajme Statike (të integruara në kod)</span>
+              <div className="h-px flex-1 bg-white/5" />
+            </div>
+            {staticNewsItems.map(item => (
+              <div key={item.id}
+                className="flex items-center gap-4 bg-white/[0.02] border border-white/5 rounded-xl px-4 py-3 opacity-60">
+                {item.imageUrl && (
+                  <img src={item.imageUrl} alt="" className="w-12 h-12 object-cover rounded-lg flex-shrink-0 opacity-60" />
+                )}
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-2 mb-0.5">
+                    <span className="text-[10px] px-2 py-0.5 rounded bg-white/5 text-white/40 uppercase tracking-wider font-bold">{item.category}</span>
+                    {item.featured && <span className="text-[10px] text-amber-400/50 font-bold uppercase tracking-wider">★ Spikatur</span>}
+                  </div>
+                  <p className="text-white/70 text-sm font-semibold truncate">{item.title}</p>
+                  <p className="text-white/25 text-xs">{new Date(item.publishedAt).toLocaleDateString("sq-AL")}</p>
                 </div>
-                <p className="text-white text-sm font-semibold truncate">{item.title}</p>
-                <p className="text-white/30 text-xs">{new Date(item.publishedAt).toLocaleDateString("sq-AL")}</p>
+                <span className="text-[10px] text-white/20 font-bold uppercase tracking-wider flex-shrink-0">Statike</span>
               </div>
-              <div className="flex gap-2 flex-shrink-0">
-                <button onClick={() => startEdit(item)}
-                  className="p-2 rounded-lg bg-white/5 hover:bg-amber-400/10 hover:text-amber-400 text-white/50 transition-colors">
-                  <Pencil size={14} />
-                </button>
-                <button onClick={() => del(item.id)}
-                  className="p-2 rounded-lg bg-white/5 hover:bg-red-500/10 hover:text-red-400 text-white/50 transition-colors">
-                  <Trash2 size={14} />
-                </button>
-              </div>
-            </motion.div>
-          ))}
+            ))}
+          </div>
         </div>
       )}
     </div>
