@@ -1,3 +1,4 @@
+import { useSeo } from "@/hooks/useSeo";
 import { useState, useEffect } from "react";
 import { Link } from "wouter";
 import { motion } from "framer-motion";
@@ -7,6 +8,11 @@ import { PageTransition } from "@/components/page-transition";
 import { AnimateOnView } from "@/components/animate-on-view";
 
 export default function News() {
+  useSeo({
+    title: "Lajme dhe Njoftime",
+    description: "Lajmet dhe njoftimet më të fundit nga Shkolla Asim Vokshi — aktivitete, arritje studentore dhe njoftime zyrtare.",
+    path: "/lajme",
+  });
   const [search, setSearch] = useState("");
   const [debouncedSearch, setDebouncedSearch] = useState("");
   const [category, setCategory] = useState("");

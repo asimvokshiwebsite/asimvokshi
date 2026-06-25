@@ -1,3 +1,4 @@
+import { useSeo } from "@/hooks/useSeo";
 import { useState, useEffect, useRef } from "react";
 import { Link } from "wouter";
 import { motion, useScroll, useTransform, useSpring, AnimatePresence } from "framer-motion";
@@ -92,6 +93,11 @@ function NewsCard({ item }: { item: { id: number; title: string; excerpt: string
 }
 
 export default function Home() {
+  useSeo({
+    title: "Shkollë e Mesme Gjuhësore në Tiranë",
+    description: "Faqja zyrtare e Shkollës 'Asim Vokshi' — shkollë e mesme me orientim gjuhësor në Tiranë, themeluar në 1965. Seksione dygjuhëshe në italisht, frengjisht, gjermanisht, spanjisht dhe anglisht.",
+    path: "/",
+  });
   const heroRef = useRef<HTMLDivElement>(null);
   const { scrollY } = useScroll();
   

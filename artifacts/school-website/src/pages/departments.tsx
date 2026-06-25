@@ -1,3 +1,4 @@
+import { useSeo } from "@/hooks/useSeo";
 import { useState } from "react";
 import { Link } from "wouter";
 import { motion, AnimatePresence } from "framer-motion";
@@ -194,6 +195,11 @@ function DeptCard({ dept }: { dept: typeof departments[0] }) {
 }
 
 export default function Departments() {
+  useSeo({
+    title: "Departamentet Akademike",
+    description: "Eksploroni 6 departamentet akademike të Shkollës Asim Vokshi: gjuhë të huaja, shkencat natyrore, matematikë, letërsi dhe më shumë.",
+    path: "/departamente",
+  });
   return (
     <PageTransition>
       {/* Hero */}

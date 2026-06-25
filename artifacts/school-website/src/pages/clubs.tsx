@@ -1,3 +1,4 @@
+import { useSeo } from "@/hooks/useSeo";
 import { Users, Calendar } from "lucide-react";
 import { PageTransition } from "@/components/page-transition";
 import { AnimateOnView } from "@/components/animate-on-view";
@@ -61,6 +62,11 @@ const clubs = [
 ];
 
 export default function Clubs() {
+  useSeo({
+    title: "Klube dhe Aktivitete Jashtëkurrikulare",
+    description: "Klube studentore dhe aktivitete jashtëkurrikulare në Shkollën Asim Vokshi — klub letërsie, debati, muzike, arte dhe shumë të tjera.",
+    path: "/klube",
+  });
   return (
     <PageTransition>
       {/* Hero Section */}

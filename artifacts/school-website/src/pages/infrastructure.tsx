@@ -1,3 +1,4 @@
+import { useSeo } from "@/hooks/useSeo";
 import { PageTransition } from "@/components/page-transition";
 import { AnimateOnView } from "@/components/animate-on-view";
 import { Monitor, Mic, FlaskConical, Library, Dumbbell, Shield, Star } from "lucide-react";
@@ -62,6 +63,11 @@ const facilities = [
 ];
 
 export default function Infrastructure() {
+  useSeo({
+    title: "Infrastruktura Shkollore",
+    description: "Zbuloni infrastrukturën moderne të Shkollës Asim Vokshi: kabinete gjuhësore, laboratorë, bibliotekë, salla multifunksionale dhe ambiente sportive.",
+    path: "/infrastruktura",
+  });
   return (
     <PageTransition>
       {/* Hero Section */}

@@ -1,3 +1,4 @@
+import { useSeo } from "@/hooks/useSeo";
 import { MapPin, Mail, Clock, User, Phone } from "lucide-react";
 import { PageTransition } from "@/components/page-transition";
 import { AnimateOnView } from "@/components/animate-on-view";
@@ -12,6 +13,11 @@ const contacts = [
 ];
 
 export default function Contact() {
+  useSeo({
+    title: "Kontakt — Na Kontaktoni",
+    description: "Kontaktoni Shkollën Asim Vokshi në Tiranë. Adresa: Rruga Elbasanit, Tiranë. Telefon, email dhe hartë e vendndodhjes.",
+    path: "/kontakt",
+  });
   // Google Map Center for Rruga Elbasanit, Tiranë (approx location of Asim Vokshi)
   const mapCenter = { lat: 41.3211, lng: 19.8322 };
 

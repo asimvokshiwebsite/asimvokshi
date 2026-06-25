@@ -1,3 +1,4 @@
+import { useSeo } from "@/hooks/useSeo";
 import { motion } from "framer-motion";
 import { Calendar as CalendarIcon, Clock, FileText } from "lucide-react";
 import { PageTransition } from "@/components/page-transition";
@@ -20,6 +21,11 @@ const STUDENT_SCHEDULES: Array<{
 }> = [];
 
 export default function Schedule() {
+  useSeo({
+    title: "Orari i Mësimeve",
+    description: "Orari i orëve mësimore për çdo klasë të Shkollës Asim Vokshi. Shikoni oraret javore për të gjitha klasat dhe lëndët.",
+    path: "/orari",
+  });
   const hasSchedules = STUDENT_SCHEDULES.length > 0;
 
   return (

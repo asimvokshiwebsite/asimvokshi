@@ -1,3 +1,4 @@
+import { useSeo } from "@/hooks/useSeo";
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { ChevronDown, Clock, UserCheck, Star, Heart, Shield, AlertTriangle } from "lucide-react";
@@ -133,6 +134,11 @@ function AccordionItem({ section }: { section: typeof sections[0] }) {
 }
 
 export default function Regulations() {
+  useSeo({
+    title: "Rregullorja e Shkollës",
+    description: "Lexoni rregulloren e brendshme të Shkollës Asim Vokshi — rregullat e sjelljes, detyrimet dhe të drejtat e nxënësve dhe stafit.",
+    path: "/rregullore",
+  });
   return (
     <PageTransition>
       {/* Hero Section */}

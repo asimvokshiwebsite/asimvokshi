@@ -1,3 +1,4 @@
+import { useSeo } from "@/hooks/useSeo";
 import { CheckCircle, Clock, Trophy } from "lucide-react";
 import { PageTransition } from "@/components/page-transition";
 import { AnimateOnView } from "@/components/animate-on-view";
@@ -57,6 +58,11 @@ const projects = [
 const statusIcon = { "Përfunduar": CheckCircle, "Aktiv": Clock, "Fitues": Trophy, "Vazhdim": Clock };
 
 export default function Projects() {
+  useSeo({
+    title: "Projektet Ndërkombëtare",
+    description: "Projektet ndërkombëtare të Shkollës Asim Vokshi — bashkëpunime Erasmus+, shkëmbime studentore dhe partneritete me shkolla evropiane.",
+    path: "/projektet",
+  });
   return (
     <PageTransition>
       {/* Hero Section */}

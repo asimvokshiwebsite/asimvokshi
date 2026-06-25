@@ -1,3 +1,4 @@
+import { useSeo } from "@/hooks/useSeo";
 import { Mail, Clock, ArrowRight, GraduationCap, Globe, Briefcase, Star, Users } from "lucide-react";
 import { Link } from "wouter";
 import { PageTransition } from "@/components/page-transition";
@@ -26,6 +27,11 @@ const steps = [
 ];
 
 export default function Career() {
+  useSeo({
+    title: "Karriera dhe Orientimi Profesional",
+    description: "Këshillim karriere dhe orientim profesional për nxënësit e Shkollës Asim Vokshi — universitete, bursa, mundësi punësimi dhe rrugëtimi pas shkollës.",
+    path: "/karriera",
+  });
   return (
     <PageTransition>
       {/* Hero Section */}

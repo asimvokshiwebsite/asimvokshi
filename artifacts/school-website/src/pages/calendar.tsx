@@ -1,3 +1,4 @@
+import { useSeo } from "@/hooks/useSeo";
 import { useState, useEffect } from "react";
 import { MapPin, Clock, Star } from "lucide-react";
 import { PageTransition } from "@/components/page-transition";
@@ -75,6 +76,11 @@ function EventCard({ event }: { event: CalendarEvent }) {
 }
 
 export default function Calendar() {
+  useSeo({
+    title: "Kalendari Akademik",
+    description: "Kalendari i vitit akademik të Shkollës Asim Vokshi — datat e rëndësishme, aktivitetet shkollore, provimet dhe pushimet.",
+    path: "/kalendar",
+  });
   const [apiEvents, setApiEvents] = useState<CalendarEvent[]>([]);
 
   useEffect(() => {

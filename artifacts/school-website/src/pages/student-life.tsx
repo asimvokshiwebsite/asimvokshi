@@ -1,3 +1,4 @@
+import { useSeo } from "@/hooks/useSeo";
 import { Link } from "wouter";
 import { motion } from "framer-motion";
 import { ArrowRight, Trophy, Globe, Sparkles, Compass } from "lucide-react";
@@ -37,6 +38,11 @@ const embassies = [
 ];
 
 export default function StudentLife() {
+  useSeo({
+    title: "Jeta Studentore",
+    description: "Jeta studentore në Asim Vokshi — aktivitete kulturore, sportive dhe akademike. Arritjet e nxënësve, partneritetet ndërkombëtare dhe projektet.",
+    path: "/jeta-studentore",
+  });
   return (
     <PageTransition>
       {/* HERO SECTION */}

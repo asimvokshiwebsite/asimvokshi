@@ -1,3 +1,4 @@
+import { useSeo } from "@/hooks/useSeo";
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { Search, Filter, Mail, Award, BookOpen, Shield, GraduationCap, Compass, Users } from "lucide-react";
@@ -62,6 +63,11 @@ function StaffCard({ member }: { member: { id: number; name: string; role: strin
 }
 
 export default function Staff() {
+  useSeo({
+    title: "Stafi Akademik",
+    description: "Njihuni me mësuesit dhe administratën e Shkollës Asim Vokshi — profesionistë të kualifikuar me përvojë në arsimin gjuhësor.",
+    path: "/stafi",
+  });
   const [search, setSearch] = useState("");
   const [debouncedSearch, setDebouncedSearch] = useState("");
   const [department, setDepartment] = useState("");

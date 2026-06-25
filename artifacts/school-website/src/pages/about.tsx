@@ -1,3 +1,4 @@
+import { useSeo } from "@/hooks/useSeo";
 import { useRef } from "react";
 import { motion, useScroll, useSpring } from "framer-motion";
 import { PageTransition } from "@/components/page-transition";
@@ -104,6 +105,11 @@ function TimelineSection() {
 }
 
 export default function About() {
+  useSeo({
+    title: "Rreth Nesh — Historia dhe Misioni",
+    description: "Mësoni historinë, misionin dhe vlerat e Shkollës Asim Vokshi. Themeluar në 1965, ofrojmë arsim cilësor gjuhësor me mësues të kualifikuar.",
+    path: "/rreth-nesh",
+  });
   return (
     <PageTransition>
       {/* Hero */}
