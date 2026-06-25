@@ -40,7 +40,7 @@ const EVENT_TYPES = [
   { value: "nderkombetare", label: "Ndërkombëtare" },
   { value: "shkollore", label: "Shkollore" },
 ];
-const PERIODS = ["Periudha e Parë", "Periudha e Dytë", "Periudha e Tretë", "Periudha e Katërt"];
+const PERIODS = ["Periudha e Parë", "Periudha e Dytë", "Periudha e Tretë"];
 
 const emptyNews = (): Partial<NewsItem> => ({
   title: "", slug: "", excerpt: "", content: "", category: "Aktivitete", imageUrl: "", featured: false,
