@@ -27,31 +27,9 @@ const typeConfig: Record<EventType, { color: string; label: string }> = {
 };
 
 const staticMonthGroups: { month: string; events: CalendarEvent[] }[] = [
-  {
-    month: "Periudha e Parë",
-    events: [
-      { date: "15", month: "Sht", title: "Fillimi i Vitit Shkollor", desc: "Ceremonia zyrtare e hapjes së vitit të ri shkollor për të gjithë nxënësit dhe stafin akademik.", time: "08:00", location: "Oborri i Shkollës", type: "shkollore", highlight: true },
-      { date: "26", month: "Sht", title: "Dita Europiane e Gjuhëve të Huaja", desc: "Aktivitete të larmishme kulturore dhe gjuhësore të organizuara nga departamentet e gjuhëve të huaja.", time: "Varet", location: "Salla e Aktiviteteve", type: "nderkombetare" },
-      { date: "28-29", month: "Nën", title: "Festat e Nëntorit", desc: "Aktivitete festive, ekspozita historike dhe shfaqje artistike kushtuar Ditës së Pavarësisë dhe Çlirimit.", time: "Varet", location: "Salla e Aktiviteteve", type: "kulturore", highlight: true },
-      { date: "Dhjetor", month: "Dhj", title: "Mbyllja e Periudhës së Parë", desc: "Vlerësimet përfundimtare dhe mbyllja e periudhës së parë mësimore para pushimeve dimërore.", time: "Gjatë ditës", location: "Klasat", type: "akademike" },
-    ],
-  },
-  {
-    month: "Periudha e Dytë",
-    events: [
-      { date: "Janar", month: "Jan", title: "Fillimi i Periudhës së Dytë", desc: "Rifillimi i procesit mësimor pas pushimeve dimërore.", time: "08:00", location: "Shkolla", type: "shkollore" },
-      { date: "Shkurt", month: "Shk", title: "Konkurset dhe Olimpiadat", desc: "Pjesëmarrja e nxënësve në olimpiadat e ndryshme rajonale dhe konkurset shkencore.", time: "Sipas kalendarit", location: "Qendrat e Provimeve", type: "akademike" },
-      { date: "Mars", month: "Mar", title: "Dita Ndërkombëtare e Frankofonisë", desc: "Aktivitete dhe shfaqje të veçanta nga Seksioni Dygjuhësh Shqip-Frëngjisht në bashkëpunim me Ambasadën Franceze.", time: "Varet", location: "Salla e Aktiviteteve", type: "nderkombetare", highlight: true },
-      { date: "Prill", month: "Pri", title: "Mbyllja e Periudhës së Dytë", desc: "Mbyllja e periudhës së dytë mësimore dhe vlerësimet përkatëse.", time: "Gjatë ditës", location: "Klasat", type: "akademike" },
-    ],
-  },
-  {
-    month: "Periudha e Tretë",
-    events: [
-      { date: "Maj", month: "Maj", title: "Provimet e Certifikimit DELF", desc: "Zhvillimi i provimeve ndërkombëtare të certifikimit të gjuhës frënge për nxënësit e seksioneve dygjuhëshe.", time: "Sipas kalendarit", location: "Qendra DELF", type: "nderkombetare", highlight: true },
-      { date: "Qershor", month: "Qer", title: "Mbyllja e Vitit Shkollor & Provimet e Maturës", desc: "Përfundimi i procesit mësimor për të gjitha klasat dhe zhvillimi i provimeve të Maturës Shtetërore.", time: "08:00", location: "Sallat e Provimeve", type: "akademike", highlight: true },
-    ],
-  },
+  { month: "Periudha e Parë", events: [] },
+  { month: "Periudha e Dytë", events: [] },
+  { month: "Periudha e Tretë", events: [] },
 ];
 
 function EventCard({ event }: { event: CalendarEvent }) {
