@@ -27,9 +27,22 @@ export function ensurePublishingTables(): Promise<void> {
         category TEXT NOT NULL,
         image_url TEXT,
         published_at TIMESTAMPTZ NOT NULL,
-        featured BOOLEAN NOT NULL DEFAULT FALSE
+        featured BOOLEAN NOT NULL DEFAULT FALSE,
+        duration TEXT NOT NULL DEFAULT '1w',
+        expires_at TIMESTAMPTZ
       );
       ALTER TABLE admin_news ADD COLUMN IF NOT EXISTS popup BOOLEAN NOT NULL DEFAULT FALSE;
+      ALTER TABLE admin_news ADD COLUMN IF NOT EXISTS duration TEXT NOT NULL DEFAULT '1w';
+      ALTER TABLE admin_news ADD COLUMN IF NOT EXISTS expires_at TIMESTAMPTZ;
+      UPDATE admin_news
+      SET expires_at = published_at + CASE
+        WHEN popup THEN INTERVAL '24 hours'
+        WHEN duration = '6h' THEN INTERVAL '6 hours'
+        WHEN duration = '24h' THEN INTERVAL '24 hours'
+        WHEN duration = '3d' THEN INTERVAL '3 days'
+        ELSE INTERVAL '7 days'
+      END
+      WHERE expires_at IS NULL;
       CREATE INDEX IF NOT EXISTS admin_news_published_at_idx ON admin_news (published_at DESC);
 
       CREATE TABLE IF NOT EXISTS admin_events (

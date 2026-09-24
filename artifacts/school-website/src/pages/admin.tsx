@@ -17,6 +17,8 @@ interface NewsItem {
   publishedAt: string;
   featured?: boolean | null;
   popup?: boolean | null;
+  duration?: "6h" | "24h" | "3d" | "1w";
+  expiresAt?: string | null;
 }
 
 interface CalendarEvent {
@@ -33,6 +35,12 @@ interface CalendarEvent {
 }
 
 const NEWS_CATEGORIES = ["Aktivitete", "Infrastrukturë", "Akademike", "Kulturore", "Ndërkombëtare", "Njoftim"];
+const NEWS_DURATIONS = [
+  { value: "6h", label: "6 orë" },
+  { value: "24h", label: "24 orë" },
+  { value: "3d", label: "3 ditë" },
+  { value: "1w", label: "1 javë" },
+];
 const EVENT_TYPES = [
   { value: "akademike", label: "Akademike" },
   { value: "kulturore", label: "Kulturore" },
@@ -42,7 +50,7 @@ const EVENT_TYPES = [
 const PERIODS = ["Periudha e Parë", "Periudha e Dytë", "Periudha e Tretë"];
 
 const emptyNews = (): Partial<NewsItem> => ({
-  title: "", slug: "", excerpt: "", content: "", category: "Aktivitete", imageUrl: "", featured: false, popup: false,
+  title: "", slug: "", excerpt: "", content: "", category: "Aktivitete", imageUrl: "", featured: false, popup: false, duration: "1w",
 });
 const emptyEvent = (): Partial<CalendarEvent> => ({
   date: "", month: "", title: "", desc: "", time: "", location: "",
@@ -304,6 +312,10 @@ function NewsSection() {
                   placeholder="/images/building_front.jpeg ose https://..."
                 />
               </div>
+            </div>
+            <div className="max-w-sm">
+              <Select label="Qëndro në faqe për" value={f.duration ?? "1w"} onChange={set("duration")} options={NEWS_DURATIONS} />
+              {f.popup && <p className="mt-2 text-[11px] text-amber-300/70">Lajmet popup fshihen automatikisht pas 24 orësh.</p>}
             </div>
             <Toggle label="Lajm i Spikatur (Featured)" checked={!!f.featured} onChange={set("featured")} />
             <Toggle label="Shfaq si lajm i madh (Popup)" checked={!!f.popup} onChange={set("popup")} />
