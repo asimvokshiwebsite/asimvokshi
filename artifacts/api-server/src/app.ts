@@ -1,4 +1,5 @@
 import express, { type Express, type Request, type Response, type NextFunction } from "express";
+import path from "node:path";
 import cors from "cors";
 import helmet from "helmet";
 import { rateLimit } from "express-rate-limit";
@@ -84,6 +85,20 @@ app.use(
 
 // ── Routes ────────────────────────────────────────────────────────────────────
 app.use("/api", router);
+
+// Render deploys the existing frontend and API as one service so relative /api
+// requests continue to work without changing the website's public behavior.
+if (process.env.SERVE_FRONTEND === "true") {
+  const frontendDir = path.resolve(process.cwd(), "artifacts/school-website/dist/public");
+  app.use(express.static(frontendDir));
+  app.use((req, res, next) => {
+    if (req.method === "GET" && !req.path.startsWith("/api")) {
+      res.sendFile(path.join(frontendDir, "index.html"));
+      return;
+    }
+    next();
+  });
+}
 
 // ── Global error handler ──────────────────────────────────────────────────────
 app.use((err: Error, _req: Request, res: Response, _next: NextFunction) => {
