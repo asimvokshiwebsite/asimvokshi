@@ -100,7 +100,7 @@ export function Navbar() {
                 }`}
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
-              >Homepage</motion.div>
+              >Kryefaqja</motion.div>
             </Link>
 
             {/* Dropdown 1: Shkolla */}
