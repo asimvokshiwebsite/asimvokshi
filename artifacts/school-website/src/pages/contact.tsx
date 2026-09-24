@@ -18,8 +18,9 @@ export default function Contact() {
     description: "Kontaktoni Shkollën Asim Vokshi në Tiranë. Adresa: Rruga Elbasanit, Tiranë. Telefon, email dhe hartë e vendndodhjes.",
     path: "/kontakt",
   });
-  // Google Map Center for Rruga Elbasanit, Tiranë (approx location of Asim Vokshi)
-  const mapCenter = { lat: 41.3211, lng: 19.8322 };
+  // Exact location supplied for Shkolla Asim Vokshi:
+  // 41°19'08.29"N 19°49'40.71"E → 41.3189694444, 19.8279750000
+  const mapCenter = { lat: 41.3189694444, lng: 19.827975 };
 
   const handleMapReady = (map: google.maps.Map) => {
     // Create a custom dark mode style for the map
