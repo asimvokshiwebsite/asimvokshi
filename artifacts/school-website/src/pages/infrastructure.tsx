@@ -13,7 +13,7 @@ const facilities = [
     color: "bg-blue-500/10 text-blue-400 border-blue-500/20",
     desc: "Laboratorë të pajisur me kompjuterë modernë për zhvillimin e lëndës së informatikës dhe rritjen e aftësive dixhitale të nxënësve tanë.",
     details: ["Kompjuterë modernë desktop", "Tabela interaktive inteligjente", "Projektorë cilësorë", "Lidhje e shpejtë interneti", "Sisteme operimi të përditësuara", "Mjedis i rehatshëm pune"],
-    image: SCHOOL_IMAGES.class_interactive,
+    image: SCHOOL_IMAGES.teachers_historical,
   },
   {
     icon: Mic,
@@ -22,7 +22,7 @@ const facilities = [
     color: "bg-purple-500/10 text-purple-400 border-purple-500/20",
     desc: "Klasa të dedikuara posaçërisht për secilën nga 7 gjuhët e huaja, të pajisura me tabela interaktive dhe projektorë për një proces mësimor sa më interaktiv.",
     details: ["Kabinete për 7 gjuhë të huaja", "Tabela interaktive", "Projektorë në çdo klasë", "Sisteme audio profesionale", "Materiale didaktike autentike", "Mjedis nxitës për komunikim"],
-    image: SCHOOL_IMAGES.building_front,
+    image: SCHOOL_IMAGES.infrastructure_language_classroom,
   },
   {
     icon: FlaskConical,
@@ -31,7 +31,7 @@ const facilities = [
     color: "bg-emerald-500/10 text-emerald-400 border-emerald-500/20",
     desc: "Laborator i rikonstruktuar me pajisje bashkëkohore dhe mjete laboratorike për kryerjen e eksperimenteve shkencore në lëndët e biologjisë dhe kimisë.",
     details: ["Pajisje moderne laboratorike", "Mjete mbrojtëse të sigurta", "Reaktivë dhe solucione të certifikuara", "Mikroskopë cilësorë", "Skelete dhe modele anatomike", "Mjedis i sigurt eksperimentimi"],
-    image: SCHOOL_IMAGES.students_activity,
+    image: SCHOOL_IMAGES.infrastructure_biochemistry_lab,
   },
   {
     icon: Library,
@@ -40,7 +40,7 @@ const facilities = [
     color: "bg-amber-500/10 text-amber-400 border-amber-500/20",
     desc: "Një mjedis i qetë dhe i ngrohtë me një fond të pasur librash, i cili u shërben nxënësve për studim, kërkim shkencor dhe pasurim kulturor.",
     details: ["Fond i pasur librash", "Hapësirë e qetë studimi", "Libra në gjuhë të huaja", "Materiale kërkimore historike", "Kënd leximi komod", "Akses i hapur për nxënësit"],
-    image: SCHOOL_IMAGES.teachers_historical,
+    image: SCHOOL_IMAGES.infrastructure_school_library,
   },
   {
     icon: Dumbbell,
@@ -49,7 +49,7 @@ const facilities = [
     color: "bg-rose-500/10 text-rose-400 border-rose-500/20",
     desc: "Palestër e brendshme dhe terrene sportive të jashtme të pajisura për zhvillimin e orëve të edukimit fizik dhe aktiviteteve sportive pas mësimit.",
     details: ["Palestër e brendshme", "Terrene sportive të jashtme", "Fusha basketbolli & volejbolli", "Pajisje sportive cilësore", "Dhoma zhveshjeje", "Aktivitete sportive të larmishme"],
-    image: SCHOOL_IMAGES.sports,
+    image: SCHOOL_IMAGES.infrastructure_sports_instagram,
   },
   {
     icon: Shield,
