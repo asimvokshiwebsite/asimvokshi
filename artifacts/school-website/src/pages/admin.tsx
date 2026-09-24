@@ -1,12 +1,10 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, type FormEvent } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Lock, LogOut, Plus, Pencil, Trash2, X, Check, Newspaper, CalendarDays, Eye, EyeOff, FileText } from "lucide-react";
 import { newsItems as staticNewsItems } from "@/content/site-content";
 
-const ADMIN_PASSWORD = "AsimVokshi2026!";
-const SESSION_KEY = "av_admin_auth";
-
 type Tab = "news" | "events";
+type AdminNotice = { kind: "success" | "error"; text: string };
 
 interface NewsItem {
   id: number;
@@ -54,17 +52,48 @@ function slugify(s: string) {
   return s.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
 }
 
+async function readResponse<T>(response: Response, fallback: string): Promise<T> {
+  let body: unknown;
+  try {
+    body = await response.json();
+  } catch {
+    throw new Error(fallback);
+  }
+  if (!response.ok) {
+    const message =
+      body && typeof body === "object" && "error" in body && typeof body.error === "string"
+        ? body.error.slice(0, 220)
+        : fallback;
+    throw new Error(message || fallback);
+  }
+  return body as T;
+}
+
+function Notice({ notice }: { notice: AdminNotice | null }) {
+  if (!notice) return null;
+  return (
+    <p
+      role={notice.kind === "error" ? "alert" : "status"}
+      aria-live={notice.kind === "error" ? "assertive" : "polite"}
+      className={`text-sm ${notice.kind === "error" ? "text-red-400" : "text-emerald-400"}`}
+    >
+      {notice.text}
+    </p>
+  );
+}
+
 function Input({ label, value, onChange, textarea, type = "text", placeholder }: {
   label: string; value: string; onChange: (v: string) => void;
   textarea?: boolean; type?: string; placeholder?: string;
 }) {
+  const id = `admin-field-${label.toLowerCase().replace(/[^a-z0-9]+/g, "-")}`;
   const cls = "w-full bg-white/5 border border-white/10 rounded-xl px-4 py-2.5 text-white text-sm placeholder-white/30 focus:outline-none focus:border-amber-400/50 focus:ring-1 focus:ring-amber-400/30 transition-colors";
   return (
     <div className="space-y-1.5">
-      <label className="text-xs font-bold uppercase tracking-wider text-white/50">{label}</label>
+      <label htmlFor={id} className="text-xs font-bold uppercase tracking-wider text-white/50">{label}</label>
       {textarea
-        ? <textarea value={value} onChange={e => onChange(e.target.value)} placeholder={placeholder} rows={4} className={cls} />
-        : <input type={type} value={value} onChange={e => onChange(e.target.value)} placeholder={placeholder} className={cls} />}
+        ? <textarea id={id} value={value} onChange={e => onChange(e.target.value)} placeholder={placeholder} rows={4} className={cls} />
+        : <input id={id} type={type} value={value} onChange={e => onChange(e.target.value)} placeholder={placeholder} className={cls} />}
     </div>
   );
 }
@@ -73,10 +102,11 @@ function Select({ label, value, onChange, options }: {
   label: string; value: string; onChange: (v: string) => void;
   options: { value: string; label: string }[];
 }) {
+  const id = `admin-select-${label.toLowerCase().replace(/[^a-z0-9]+/g, "-")}`;
   return (
     <div className="space-y-1.5">
-      <label className="text-xs font-bold uppercase tracking-wider text-white/50">{label}</label>
-      <select value={value} onChange={e => onChange(e.target.value)}
+      <label htmlFor={id} className="text-xs font-bold uppercase tracking-wider text-white/50">{label}</label>
+      <select id={id} value={value} onChange={e => onChange(e.target.value)}
         className="w-full bg-[#07111F] border border-white/10 rounded-xl px-4 py-2.5 text-white text-sm focus:outline-none focus:border-amber-400/50 focus:ring-1 focus:ring-amber-400/30 transition-colors">
         {options.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
       </select>
@@ -86,15 +116,19 @@ function Select({ label, value, onChange, options }: {
 
 function Toggle({ label, checked, onChange }: { label: string; checked: boolean; onChange: (v: boolean) => void }) {
   return (
-    <label className="flex items-center gap-3 cursor-pointer">
-      <div
+    <div className="flex items-center gap-3">
+      <button
+        type="button"
+        role="switch"
+        aria-checked={checked}
+        aria-label={label}
         onClick={() => onChange(!checked)}
-        className={`w-10 h-5 rounded-full transition-colors relative ${checked ? "bg-amber-400" : "bg-white/10"}`}
+        className={`w-10 h-5 rounded-full transition-colors relative focus-visible:outline focus-visible:outline-2 focus-visible:outline-amber-300 ${checked ? "bg-amber-400" : "bg-white/10"}`}
       >
         <div className={`absolute top-0.5 left-0.5 w-4 h-4 bg-white rounded-full shadow transition-transform ${checked ? "translate-x-5" : ""}`} />
-      </div>
+      </button>
       <span className="text-sm text-white/70">{label}</span>
-    </label>
+    </div>
   );
 }
 
@@ -106,25 +140,33 @@ function NewsSection() {
   const [editingId, setEditingId] = useState<number | null>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
-  const [msg, setMsg] = useState("");
+  const [notice, setNotice] = useState<AdminNotice | null>(null);
 
   useEffect(() => { fetchNews(); }, []);
 
   async function fetchNews() {
     setLoading(true);
     try {
-      const r = await fetch("/api/news");
-      setItems(await r.json());
-    } catch { setItems([]); }
-    setLoading(false);
+      const r = await fetch("/api/news", { cache: "no-store" });
+      const data = await readResponse<NewsItem[]>(r, "Nuk mund të ngarkohen lajmet.");
+      if (!Array.isArray(data)) throw new Error("Përgjigjja e serverit është e pavlefshme.");
+      setItems(data);
+      setNotice(null);
+    } catch (error) {
+      setNotice({ kind: "error", text: error instanceof Error ? error.message : "Nuk mund të ngarkohen lajmet." });
+    } finally {
+      setLoading(false);
+    }
   }
 
   function startAdd() {
+    setNotice(null);
     setEditing(emptyNews());
     setEditingId(null);
   }
 
   function startEdit(item: NewsItem) {
+    setNotice(null);
     setEditing({ ...item });
     setEditingId(item.id);
   }
@@ -137,11 +179,11 @@ function NewsSection() {
   async function save() {
     if (!editing) return;
     if (!editing.title?.trim() || !editing.content?.trim()) {
-      setMsg("Titulli dhe përmbajtja janë të detyrueshme.");
+      setNotice({ kind: "error", text: "Titulli dhe përmbajtja janë të detyrueshme." });
       return;
     }
     setSaving(true);
-    setMsg("");
+    setNotice(null);
     const payload = {
       ...editing,
       slug: editing.slug || slugify(editing.title || ""),
@@ -149,22 +191,33 @@ function NewsSection() {
     try {
       if (editingId !== null) {
         const r = await fetch(`/api/news/${editingId}`, { method: "PUT", headers: { "Content-Type": "application/json" }, body: JSON.stringify(payload) });
-        const updated = await r.json();
+        const updated = await readResponse<NewsItem>(r, "Gabim gjatë ruajtjes së lajmit.");
         setItems(prev => prev.map(i => i.id === editingId ? updated : i));
       } else {
         const r = await fetch("/api/news", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(payload) });
-        const created = await r.json();
+        const created = await readResponse<NewsItem>(r, "Gabim gjatë publikimit të lajmit.");
         setItems(prev => [created, ...prev]);
       }
       cancelEdit();
-    } catch { setMsg("Gabim gjatë ruajtjes."); }
-    setSaving(false);
+      setNotice({ kind: "success", text: "Lajmi u ruajt dhe u publikua në faqen publike." });
+    } catch (error) {
+      setNotice({ kind: "error", text: error instanceof Error ? error.message : "Gabim gjatë ruajtjes së lajmit." });
+    } finally {
+      setSaving(false);
+    }
   }
 
   async function del(id: number) {
     if (!confirm("Jeni i sigurt që doni të fshini këtë lajm?")) return;
-    await fetch(`/api/news/${id}`, { method: "DELETE" });
-    setItems(prev => prev.filter(i => i.id !== id));
+    setNotice(null);
+    try {
+      const r = await fetch(`/api/news/${id}`, { method: "DELETE" });
+      await readResponse<{ ok: boolean }>(r, "Gabim gjatë fshirjes së lajmit.");
+      setItems(prev => prev.filter(i => i.id !== id));
+      setNotice({ kind: "success", text: "Lajmi u fshi." });
+    } catch (error) {
+      setNotice({ kind: "error", text: error instanceof Error ? error.message : "Gabim gjatë fshirjes së lajmit." });
+    }
   }
 
   const f = editing ?? {};
@@ -180,6 +233,7 @@ function NewsSection() {
           </button>
         )}
       </div>
+      <Notice notice={notice} />
 
       <AnimatePresence>
         {editing && (
@@ -201,7 +255,6 @@ function NewsSection() {
                 placeholder="/images/building_front.jpeg" />
             </div>
             <Toggle label="Lajm i Spikatur (Featured)" checked={!!f.featured} onChange={set("featured")} />
-            {msg && <p className="text-red-400 text-sm">{msg}</p>}
             <div className="flex gap-3 pt-2">
               <button onClick={save} disabled={saving}
                 className="flex items-center gap-2 px-5 py-2 bg-amber-400 hover:bg-amber-300 disabled:opacity-50 text-black text-sm font-bold rounded-xl transition-colors">
@@ -316,50 +369,67 @@ function EventsSection() {
   const [editingId, setEditingId] = useState<number | null>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
-  const [msg, setMsg] = useState("");
+  const [notice, setNotice] = useState<AdminNotice | null>(null);
 
   useEffect(() => { fetchEvents(); }, []);
 
   async function fetchEvents() {
     setLoading(true);
     try {
-      const r = await fetch("/api/events");
-      setItems(await r.json());
-    } catch { setItems([]); }
-    setLoading(false);
+      const r = await fetch("/api/events", { cache: "no-store" });
+      const data = await readResponse<CalendarEvent[]>(r, "Nuk mund të ngarkohen aktivitetet.");
+      if (!Array.isArray(data)) throw new Error("Përgjigjja e serverit është e pavlefshme.");
+      setItems(data);
+      setNotice(null);
+    } catch (error) {
+      setNotice({ kind: "error", text: error instanceof Error ? error.message : "Nuk mund të ngarkohen aktivitetet." });
+    } finally {
+      setLoading(false);
+    }
   }
 
-  function startAdd() { setEditing(emptyEvent()); setEditingId(null); }
-  function startEdit(item: CalendarEvent) { setEditing({ ...item }); setEditingId(item.id); }
+  function startAdd() { setNotice(null); setEditing(emptyEvent()); setEditingId(null); }
+  function startEdit(item: CalendarEvent) { setNotice(null); setEditing({ ...item }); setEditingId(item.id); }
   function cancelEdit() { setEditing(null); setEditingId(null); }
 
   async function save() {
     if (!editing) return;
     if (!editing.title?.trim() || !editing.desc?.trim()) {
-      setMsg("Titulli dhe përshkrimi janë të detyrueshëm.");
+      setNotice({ kind: "error", text: "Titulli dhe përshkrimi janë të detyrueshëm." });
       return;
     }
     setSaving(true);
-    setMsg("");
+    setNotice(null);
     try {
       if (editingId !== null) {
         const r = await fetch(`/api/events/${editingId}`, { method: "PUT", headers: { "Content-Type": "application/json" }, body: JSON.stringify(editing) });
-        const updated = await r.json();
+        const updated = await readResponse<CalendarEvent>(r, "Gabim gjatë ruajtjes së aktivitetit.");
         setItems(prev => prev.map(i => i.id === editingId ? updated : i));
       } else {
         const r = await fetch("/api/events", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(editing) });
-        const created = await r.json();
+        const created = await readResponse<CalendarEvent>(r, "Gabim gjatë publikimit të aktivitetit.");
         setItems(prev => [...prev, created]);
       }
       cancelEdit();
-    } catch { setMsg("Gabim gjatë ruajtjes."); }
-    setSaving(false);
+      setNotice({ kind: "success", text: "Aktiviteti u ruajt dhe u publikua në kalendar." });
+    } catch (error) {
+      setNotice({ kind: "error", text: error instanceof Error ? error.message : "Gabim gjatë ruajtjes së aktivitetit." });
+    } finally {
+      setSaving(false);
+    }
   }
 
   async function del(id: number) {
     if (!confirm("Jeni i sigurt që doni të fshini këtë aktivitet?")) return;
-    await fetch(`/api/events/${id}`, { method: "DELETE" });
-    setItems(prev => prev.filter(i => i.id !== id));
+    setNotice(null);
+    try {
+      const r = await fetch(`/api/events/${id}`, { method: "DELETE" });
+      await readResponse<{ ok: boolean }>(r, "Gabim gjatë fshirjes së aktivitetit.");
+      setItems(prev => prev.filter(i => i.id !== id));
+      setNotice({ kind: "success", text: "Aktiviteti u fshi." });
+    } catch (error) {
+      setNotice({ kind: "error", text: error instanceof Error ? error.message : "Gabim gjatë fshirjes së aktivitetit." });
+    }
   }
 
   const f = editing ?? {};
@@ -380,6 +450,7 @@ function EventsSection() {
           </button>
         )}
       </div>
+      <Notice notice={notice} />
 
       <AnimatePresence>
         {editing && (
@@ -406,7 +477,6 @@ function EventsSection() {
                 <Toggle label="Ngjarje Kryesore" checked={!!f.highlight} onChange={set("highlight")} />
               </div>
             </div>
-            {msg && <p className="text-red-400 text-sm">{msg}</p>}
             <div className="flex gap-3 pt-2">
               <button onClick={save} disabled={saving}
                 className="flex items-center gap-2 px-5 py-2 bg-amber-400 hover:bg-amber-300 disabled:opacity-50 text-black text-sm font-bold rounded-xl transition-colors">
@@ -467,17 +537,31 @@ function EventsSection() {
 function LoginGate({ onLogin }: { onLogin: () => void }) {
   const [pw, setPw] = useState("");
   const [show, setShow] = useState(false);
-  const [err, setErr] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const [shake, setShake] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
 
-  function attempt() {
-    if (pw === ADMIN_PASSWORD) {
-      sessionStorage.setItem(SESSION_KEY, "1");
+  async function attempt(event?: FormEvent) {
+    event?.preventDefault();
+    if (submitting) return;
+
+    setSubmitting(true);
+    setError(null);
+    try {
+      const response = await fetch("/api/admin/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ password: pw }),
+      });
+      await readResponse<{ authenticated: boolean }>(response, "Hyrja në panel dështoi.");
+      setPw("");
       onLogin();
-    } else {
-      setErr(true);
+    } catch (requestError) {
+      setError(requestError instanceof Error ? requestError.message : "Hyrja në panel dështoi.");
       setShake(true);
       setTimeout(() => setShake(false), 500);
+    } finally {
+      setSubmitting(false);
     }
   }
 
@@ -498,26 +582,28 @@ function LoginGate({ onLogin }: { onLogin: () => void }) {
             <p className="text-white/40 text-sm mt-1">Shkolla "Asim Vokshi"</p>
           </div>
 
-          <div className="space-y-4">
+          <form className="space-y-4" onSubmit={attempt}>
             <div className="relative">
               <input
                 type={show ? "text" : "password"}
                 value={pw}
-                onChange={e => { setPw(e.target.value); setErr(false); }}
-                onKeyDown={e => e.key === "Enter" && attempt()}
+                onChange={e => { setPw(e.target.value); setError(null); }}
                 placeholder="Fjalëkalimi..."
-                className={`w-full bg-white/5 border rounded-xl px-4 py-3 text-white pr-12 text-sm placeholder-white/30 focus:outline-none focus:ring-1 transition-colors ${err ? "border-red-500/50 focus:border-red-500/50 focus:ring-red-500/30" : "border-white/10 focus:border-amber-400/50 focus:ring-amber-400/30"}`}
+                autoComplete="current-password"
+                aria-label="Fjalëkalimi"
+                disabled={submitting}
+                className={`w-full bg-white/5 border rounded-xl px-4 py-3 text-white pr-12 text-sm placeholder-white/30 focus:outline-none focus:ring-1 transition-colors disabled:opacity-60 ${error ? "border-red-500/50 focus:border-red-500/50 focus:ring-red-500/30" : "border-white/10 focus:border-amber-400/50 focus:ring-amber-400/30"}`}
               />
-              <button onClick={() => setShow(s => !s)} className="absolute right-3 top-1/2 -translate-y-1/2 text-white/30 hover:text-white/60 transition-colors">
+              <button type="button" onClick={() => setShow(s => !s)} className="absolute right-3 top-1/2 -translate-y-1/2 text-white/30 hover:text-white/60 transition-colors">
                 {show ? <EyeOff size={16} /> : <Eye size={16} />}
               </button>
             </div>
-            {err && <p className="text-red-400 text-xs font-semibold">Fjalëkalim i gabuar. Provoni përsëri.</p>}
-            <button onClick={attempt}
-              className="w-full py-3 bg-crimson hover:bg-crimson/80 text-white font-bold rounded-xl text-sm transition-colors">
-              Hyr
+            {error && <p className="text-red-400 text-xs font-semibold" role="alert">{error}</p>}
+            <button type="submit" disabled={submitting}
+              className="w-full py-3 bg-crimson hover:bg-crimson/80 disabled:opacity-60 text-white font-bold rounded-xl text-sm transition-colors">
+              {submitting ? "Duke hyrë..." : "Hyr"}
             </button>
-          </div>
+          </form>
         </div>
       </motion.div>
     </div>
@@ -527,15 +613,43 @@ function LoginGate({ onLogin }: { onLogin: () => void }) {
 // ─── Main Admin Page ─────────────────────────────────────────────────────────
 
 export default function Admin() {
-  const [authed, setAuthed] = useState(() => sessionStorage.getItem(SESSION_KEY) === "1");
+  const [authed, setAuthed] = useState(false);
+  const [checkingSession, setCheckingSession] = useState(true);
   const [tab, setTab] = useState<Tab>("news");
 
-  function logout() {
-    sessionStorage.removeItem(SESSION_KEY);
-    setAuthed(false);
+  useEffect(() => {
+    let active = true;
+    fetch("/api/admin/session", { cache: "no-store" })
+      .then(response => readResponse<{ authenticated: boolean }>(response, "Nuk mund të verifikohet sesioni."))
+      .then(session => {
+        if (active) setAuthed(session.authenticated);
+      })
+      .catch(() => {
+        if (active) setAuthed(false);
+      })
+      .finally(() => {
+        if (active) setCheckingSession(false);
+      });
+    return () => { active = false; };
+  }, []);
+
+  async function logout() {
+    try {
+      await fetch("/api/admin/logout", { method: "POST" });
+    } finally {
+      setAuthed(false);
+    }
+  }
+
+  if (checkingSession) {
+    return <div className="min-h-screen bg-[#04090F]" aria-busy="true" />;
   }
 
   if (!authed) return <LoginGate onLogin={() => setAuthed(true)} />;
+
+  function handleLogout() {
+    void logout();
+  }
 
   return (
     <div className="min-h-screen bg-[#04090F]">
@@ -548,7 +662,7 @@ export default function Admin() {
             <p className="text-[10px] text-white/30 uppercase tracking-widest font-bold">Shkolla Asim Vokshi</p>
             <h1 className="text-base font-serif font-bold text-white leading-tight">Panel Administrativ</h1>
           </div>
-          <button onClick={logout} className="flex items-center gap-2 px-3 py-2 rounded-xl bg-white/5 hover:bg-white/10 text-white/50 hover:text-white text-xs font-bold transition-colors border border-white/5">
+          <button onClick={handleLogout} className="flex items-center gap-2 px-3 py-2 rounded-xl bg-white/5 hover:bg-white/10 text-white/50 hover:text-white text-xs font-bold transition-colors border border-white/5">
             <LogOut size={13} /> Dil
           </button>
         </div>

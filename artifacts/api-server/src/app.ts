@@ -2,11 +2,14 @@ import express, { type Express, type Request, type Response, type NextFunction }
 import cors from "cors";
 import helmet from "helmet";
 import { rateLimit } from "express-rate-limit";
+import cookieParser from "cookie-parser";
 import pinoHttp from "pino-http";
 import router from "./routes";
 import { logger } from "./lib/logger";
+import { isAllowedOrigin } from "./lib/origin-policy";
 
 const app: Express = express();
+app.disable("x-powered-by");
 
 // ── Security headers ──────────────────────────────────────────────────────────
 app.use(
@@ -18,15 +21,11 @@ app.use(
 );
 
 // ── CORS ──────────────────────────────────────────────────────────────────────
-const allowedOrigins = process.env.REPLIT_DOMAINS
-  ? process.env.REPLIT_DOMAINS.split(",").map((d) => `https://${d.trim()}`)
-  : [];
-
 app.use(
   cors({
     origin: (origin, cb) => {
-      // allow same-host (no origin header) or localhost in dev
-      if (!origin || allowedOrigins.length === 0 || allowedOrigins.some((o) => origin.startsWith(o)) || origin.includes("localhost")) {
+      // Non-browser clients omit Origin; browser origins must match exactly.
+      if (!origin || isAllowedOrigin(origin)) {
         cb(null, true);
       } else {
         cb(new Error("Not allowed by CORS"));
@@ -34,7 +33,7 @@ app.use(
     },
     methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
     allowedHeaders: ["Content-Type"],
-    credentials: false,
+    credentials: true,
   }),
 );
 
@@ -66,7 +65,7 @@ app.use(
 
 // ── Body parsing (size-limited) ───────────────────────────────────────────────
 app.use(express.json({ limit: "64kb" }));
-app.use(express.urlencoded({ extended: true, limit: "64kb" }));
+app.use(cookieParser());
 
 // ── Request logging ───────────────────────────────────────────────────────────
 app.use(
@@ -90,6 +89,15 @@ app.use("/api", router);
 app.use((err: Error, _req: Request, res: Response, _next: NextFunction) => {
   if (err.message === "Not allowed by CORS") {
     res.status(403).json({ error: "CORS: origjina e palejuar." });
+    return;
+  }
+  const errorType = (err as Error & { type?: string }).type;
+  if (errorType === "entity.parse.failed") {
+    res.status(400).json({ error: "Formati i kërkesës është i pavlefshëm." });
+    return;
+  }
+  if (errorType === "entity.too.large") {
+    res.status(413).json({ error: "Kërkesa është shumë e madhe." });
     return;
   }
   res.status(500).json({ error: "Gabim i brendshëm i serverit." });
