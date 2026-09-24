@@ -65,7 +65,8 @@ app.use(
 );
 
 // ── Body parsing (size-limited) ───────────────────────────────────────────────
-app.use(express.json({ limit: "64kb" }));
+// News images are sent as validated data URLs from the device file picker.
+app.use(express.json({ limit: "8mb" }));
 app.use(cookieParser());
 
 // ── Request logging ───────────────────────────────────────────────────────────

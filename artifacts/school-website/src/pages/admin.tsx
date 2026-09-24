@@ -52,6 +52,17 @@ function slugify(s: string) {
   return s.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
 }
 
+const MAX_IMAGE_UPLOAD_BYTES = 4 * 1024 * 1024;
+
+function readImageFile(file: File): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(String(reader.result));
+    reader.onerror = () => reject(new Error("Fotografia nuk mund të lexohet."));
+    reader.readAsDataURL(file);
+  });
+}
+
 async function readResponse<T>(response: Response, fallback: string): Promise<T> {
   let body: unknown;
   try {
@@ -222,6 +233,24 @@ function NewsSection() {
 
   const f = editing ?? {};
   const set = (k: keyof NewsItem) => (v: any) => setEditing(prev => ({ ...prev, [k]: v }));
+  async function chooseImage(file: File | undefined) {
+    if (!file) return;
+    if (!["image/jpeg", "image/png", "image/webp", "image/gif"].includes(file.type)) {
+      setNotice({ kind: "error", text: "Zgjidhni një fotografi JPG, PNG, WebP ose GIF." });
+      return;
+    }
+    if (file.size > MAX_IMAGE_UPLOAD_BYTES) {
+      setNotice({ kind: "error", text: "Fotografia duhet të jetë më e vogël se 4 MB." });
+      return;
+    }
+    try {
+      const dataUrl = await readImageFile(file);
+      setEditing(prev => ({ ...prev, imageUrl: dataUrl }));
+      setNotice({ kind: "success", text: `Fotografia “${file.name}” u zgjodh.` });
+    } catch (error) {
+      setNotice({ kind: "error", text: error instanceof Error ? error.message : "Fotografia nuk mund të lexohet." });
+    }
+  }
 
   return (
     <div className="space-y-6">
@@ -251,8 +280,29 @@ function NewsSection() {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <Select label="Kategoria" value={f.category ?? "Aktivitete"} onChange={set("category")}
                 options={NEWS_CATEGORIES.map(c => ({ value: c, label: c }))} />
-              <Input label="URL e Fotografisë" value={f.imageUrl ?? ""} onChange={set("imageUrl")}
-                placeholder="/images/building_front.jpeg" />
+              <div className="space-y-2">
+                <label htmlFor="admin-image-file" className="text-xs font-bold uppercase tracking-wider text-white/50">Fotografia nga pajisja</label>
+                <input
+                  id="admin-image-file"
+                  type="file"
+                  accept="image/jpeg,image/png,image/webp,image/gif"
+                  onChange={e => {
+                    void chooseImage(e.target.files?.[0]);
+                    e.currentTarget.value = "";
+                  }}
+                  className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-2.5 text-white text-sm file:mr-3 file:rounded-lg file:border-0 file:bg-amber-400 file:px-3 file:py-1.5 file:text-xs file:font-bold file:text-black hover:file:bg-amber-300"
+                />
+                <p className="text-[11px] text-white/35">Zgjidhni nga fotot ose skedarët në iPhone, Android, Windows ose Mac. Maksimumi 4 MB.</p>
+                {typeof f.imageUrl === "string" && f.imageUrl.startsWith("data:image/") && (
+                  <p className="text-xs text-emerald-400">Fotografia e pajisjes është gati për publikim.</p>
+                )}
+                <Input
+                  label="Ose URL e fotografisë"
+                  value={typeof f.imageUrl === "string" && f.imageUrl.startsWith("data:image/") ? "" : f.imageUrl ?? ""}
+                  onChange={set("imageUrl")}
+                  placeholder="/images/building_front.jpeg ose https://..."
+                />
+              </div>
             </div>
             <Toggle label="Lajm i Spikatur (Featured)" checked={!!f.featured} onChange={set("featured")} />
             <div className="flex gap-3 pt-2">

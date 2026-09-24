@@ -70,7 +70,7 @@ function validateNewsBody(body: any): NewsValidation {
   const excerpt = sanitizeString(body.excerpt, 500);
   const content = sanitizeString(body.content, 20000);
   const category = sanitizeString(body.category, 60);
-  const imageUrl = sanitizeString(body.imageUrl ?? "", 500);
+  const imageUrl = sanitizeString(body.imageUrl ?? "", 5_500_000);
   const featured = Boolean(body.featured);
 
   if (!title) return { ok: false, error: "Titulli është i detyrueshëm." };
@@ -83,6 +83,9 @@ function validateNewsBody(body: any): NewsValidation {
 }
 
 function isSafeImageUrl(value: string): boolean {
+  if (value.startsWith("data:image/")) {
+    return /^data:image\/(?:jpeg|png|webp|gif);base64,[A-Za-z0-9+/]+={0,2}$/.test(value) && value.length <= 5_500_000;
+  }
   if (value.startsWith("/images/")) {
     return !value.includes("..") && !value.includes("\\") && !value.includes("\0");
   }
