@@ -1,35 +1,55 @@
 import { Router } from "express";
-import fs from "fs";
-import path from "path";
-import { randomUUID } from "node:crypto";
-import { fileURLToPath } from "node:url";
+import { ensurePublishingTables, pool } from "@workspace/db";
 import { requireAdminAuth } from "./admin-auth";
 
 const router = Router();
-const dataDir = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../data");
-const newsFile = path.join(dataDir, "news.json");
 
-function ensureDataDir() {
-  if (!fs.existsSync(dataDir)) fs.mkdirSync(dataDir, { recursive: true, mode: 0o700 });
+type NewsItem = {
+  id: number;
+  slug: string;
+  title: string;
+  excerpt: string;
+  content: string;
+  category: string;
+  imageUrl: string | null;
+  publishedAt: string;
+  featured: boolean;
+};
+
+type NewsRow = {
+  id: string;
+  slug: string;
+  title: string;
+  excerpt: string;
+  content: string;
+  category: string;
+  image_url: string | null;
+  published_at: Date | string;
+  featured: boolean;
+};
+
+function rowToNews(row: NewsRow): NewsItem {
+  return {
+    id: Number(row.id),
+    slug: row.slug,
+    title: row.title,
+    excerpt: row.excerpt,
+    content: row.content,
+    category: row.category,
+    imageUrl: row.image_url,
+    publishedAt: new Date(row.published_at).toISOString(),
+    featured: row.featured,
+  };
 }
 
-function readNews(): any[] {
-  ensureDataDir();
-  if (!fs.existsSync(newsFile)) return [];
-  try {
-    const data: unknown = JSON.parse(fs.readFileSync(newsFile, "utf-8"));
-    if (!Array.isArray(data)) throw new Error("Stored news data is not an array");
-    return data;
-  } catch {
-    throw new Error("Stored news data could not be read");
-  }
-}
-
-function writeNews(data: any[]) {
-  ensureDataDir();
-  const temporaryFile = path.join(dataDir, `.news-${randomUUID()}.tmp`);
-  fs.writeFileSync(temporaryFile, JSON.stringify(data, null, 2), { mode: 0o600 });
-  fs.renameSync(temporaryFile, newsFile);
+async function readNews(): Promise<NewsItem[]> {
+  await ensurePublishingTables();
+  const result = await pool.query<NewsRow>(`
+    SELECT id, slug, title, excerpt, content, category, image_url, published_at, featured
+    FROM admin_news
+    ORDER BY published_at DESC
+  `);
+  return result.rows.map(rowToNews);
 }
 
 function sanitizeString(val: unknown, maxLen: number): string {
@@ -37,7 +57,11 @@ function sanitizeString(val: unknown, maxLen: number): string {
   return val.replace(/<[^>]*>/g, "").trim().slice(0, maxLen);
 }
 
-function validateNewsBody(body: any): { ok: boolean; error?: string; data?: any } {
+type NewsValidation =
+  | { ok: true; data: Omit<NewsItem, "id" | "publishedAt"> }
+  | { ok: false; error: string };
+
+function validateNewsBody(body: any): NewsValidation {
   if (!body || typeof body !== "object" || Array.isArray(body)) {
     return { ok: false, error: "Të dhënat e lajmit janë të pavlefshme." };
   }
@@ -70,18 +94,18 @@ function isSafeImageUrl(value: string): boolean {
   }
 }
 
-router.get("/news", (_req, res) => {
+router.get("/news", async (_req, res) => {
   res.setHeader("Cache-Control", "no-store");
-  res.json(readNews());
+  res.json(await readNews());
 });
 
-router.get("/news/:id", (req, res) => {
+router.get("/news/:id", async (req, res) => {
   const id = Number(req.params.id);
   if (!Number.isSafeInteger(id) || id <= 0) {
     res.status(400).json({ error: "ID e pavlefshme." });
     return;
   }
-  const item = readNews().find((entry: any) => entry.id === id);
+  const item = (await readNews()).find((entry) => entry.id === id);
   if (!item) {
     res.status(404).json({ error: "Lajmi nuk u gjet." });
     return;
@@ -90,45 +114,52 @@ router.get("/news/:id", (req, res) => {
   res.json(item);
 });
 
-router.post("/news", requireAdminAuth, (req, res) => {
+router.post("/news", requireAdminAuth, async (req, res) => {
   const v = validateNewsBody(req.body);
   if (!v.ok) { res.status(400).json({ error: v.error }); return; }
 
-  const items = readNews();
-  const newItem = { ...v.data, id: Date.now(), publishedAt: new Date().toISOString() };
-  items.unshift(newItem);
-  writeNews(items);
+  await ensurePublishingTables();
+  const id = Date.now();
+  const publishedAt = new Date();
+  const result = await pool.query<NewsRow>(`
+    INSERT INTO admin_news (id, slug, title, excerpt, content, category, image_url, published_at, featured)
+    VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
+    RETURNING id, slug, title, excerpt, content, category, image_url, published_at, featured
+  `, [id, v.data.slug, v.data.title, v.data.excerpt, v.data.content, v.data.category, v.data.imageUrl, publishedAt, v.data.featured]);
+  const newItem = rowToNews(result.rows[0]);
   req.log?.info({ event: "news_published", recordId: newItem.id }, "News published");
   res.status(201).json(newItem);
 });
 
-router.put("/news/:id", requireAdminAuth, (req, res) => {
+router.put("/news/:id", requireAdminAuth, async (req, res) => {
   const id = Number(req.params.id);
   if (!Number.isSafeInteger(id) || id <= 0) { res.status(400).json({ error: "ID e pavlefshme." }); return; }
 
   const v = validateNewsBody(req.body);
   if (!v.ok) { res.status(400).json({ error: v.error }); return; }
 
-  const items = readNews();
-  const idx = items.findIndex((i: any) => i.id === id);
-  if (idx === -1) { res.status(404).json({ error: "Lajmi nuk u gjet." }); return; }
+  await ensurePublishingTables();
+  const result = await pool.query<NewsRow>(`
+    UPDATE admin_news
+    SET slug = $2, title = $3, excerpt = $4, content = $5, category = $6, image_url = $7, featured = $8
+    WHERE id = $1
+    RETURNING id, slug, title, excerpt, content, category, image_url, published_at, featured
+  `, [id, v.data.slug, v.data.title, v.data.excerpt, v.data.content, v.data.category, v.data.imageUrl, v.data.featured]);
+  if (!result.rows[0]) { res.status(404).json({ error: "Lajmi nuk u gjet." }); return; }
 
-  items[idx] = { ...items[idx], ...v.data, id };
-  writeNews(items);
+  const updated = rowToNews(result.rows[0]);
   req.log?.info({ event: "news_updated", recordId: id }, "News updated");
-  res.json(items[idx]);
+  res.json(updated);
 });
 
-router.delete("/news/:id", requireAdminAuth, (req, res) => {
+router.delete("/news/:id", requireAdminAuth, async (req, res) => {
   const id = Number(req.params.id);
   if (!Number.isSafeInteger(id) || id <= 0) { res.status(400).json({ error: "ID e pavlefshme." }); return; }
 
-  let items = readNews();
-  const before = items.length;
-  items = items.filter((i: any) => i.id !== id);
-  if (items.length === before) { res.status(404).json({ error: "Lajmi nuk u gjet." }); return; }
+  await ensurePublishingTables();
+  const result = await pool.query("DELETE FROM admin_news WHERE id = $1", [id]);
+  if (result.rowCount !== 1) { res.status(404).json({ error: "Lajmi nuk u gjet." }); return; }
 
-  writeNews(items);
   req.log?.info({ event: "news_deleted", recordId: id }, "News deleted");
   res.json({ ok: true });
 });
