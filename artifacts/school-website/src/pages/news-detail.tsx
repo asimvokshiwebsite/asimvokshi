@@ -1,15 +1,40 @@
+import { useEffect, useState } from "react";
 import { Link, useParams } from "wouter";
 import { motion } from "framer-motion";
 import { ArrowLeft, Calendar, Tag, BookOpen, Compass, Shield } from "lucide-react";
-import { getNewsById } from "@/content/site-content";
+import { getNewsById, type NewsItem } from "@/content/site-content";
 import { PageTransition } from "@/components/page-transition";
 
 export default function NewsDetail() {
   const params = useParams<{ id: string }>();
   const id = Number(params.id);
-  const item = getNewsById(id);
-  const isLoading = false;
-  const isError = false;
+  const staticItem = getNewsById(id);
+  const [apiItem, setApiItem] = useState<NewsItem | null>(null);
+  const [isLoading, setIsLoading] = useState(!staticItem);
+  const [isError, setIsError] = useState(false);
+
+  useEffect(() => {
+    let active = true;
+    setIsLoading(!staticItem);
+    setIsError(false);
+    fetch(`/api/news/${id}`, { cache: "no-store" })
+      .then(async response => {
+        if (!response.ok) throw new Error("Article not found");
+        return response.json() as Promise<NewsItem>;
+      })
+      .then(data => {
+        if (active) setApiItem(data);
+      })
+      .catch(() => {
+        if (active && !staticItem) setIsError(true);
+      })
+      .finally(() => {
+        if (active) setIsLoading(false);
+      });
+    return () => { active = false; };
+  }, [id]);
+
+  const item = apiItem ?? staticItem;
 
   if (isLoading) {
     return (
