@@ -14,6 +14,7 @@ type NewsItem = {
   imageUrl: string | null;
   publishedAt: string;
   featured: boolean;
+  popup: boolean;
 };
 
 type NewsRow = {
@@ -26,6 +27,7 @@ type NewsRow = {
   image_url: string | null;
   published_at: Date | string;
   featured: boolean;
+  popup: boolean;
 };
 
 function rowToNews(row: NewsRow): NewsItem {
@@ -39,13 +41,14 @@ function rowToNews(row: NewsRow): NewsItem {
     imageUrl: row.image_url,
     publishedAt: new Date(row.published_at).toISOString(),
     featured: row.featured,
+    popup: row.popup,
   };
 }
 
 async function readNews(): Promise<NewsItem[]> {
   await ensurePublishingTables();
   const result = await pool.query<NewsRow>(`
-    SELECT id, slug, title, excerpt, content, category, image_url, published_at, featured
+    SELECT id, slug, title, excerpt, content, category, image_url, published_at, featured, popup
     FROM admin_news
     ORDER BY published_at DESC
   `);
@@ -72,6 +75,7 @@ function validateNewsBody(body: any): NewsValidation {
   const category = sanitizeString(body.category, 60);
   const imageUrl = sanitizeString(body.imageUrl ?? "", 5_500_000);
   const featured = Boolean(body.featured);
+  const popup = Boolean(body.popup);
 
   if (!title) return { ok: false, error: "Titulli është i detyrueshëm." };
   if (!content) return { ok: false, error: "Përmbajtja është e detyrueshme." };
@@ -79,7 +83,7 @@ function validateNewsBody(body: any): NewsValidation {
     return { ok: false, error: "Përdorni një foto lokale ose një adresë HTTPS." };
   }
 
-  return { ok: true, data: { title, slug, excerpt, content, category, imageUrl: imageUrl || null, featured } };
+  return { ok: true, data: { title, slug, excerpt, content, category, imageUrl: imageUrl || null, featured, popup } };
 }
 
 function isSafeImageUrl(value: string): boolean {
@@ -125,10 +129,10 @@ router.post("/news", requireAdminAuth, async (req, res) => {
   const id = Date.now();
   const publishedAt = new Date();
   const result = await pool.query<NewsRow>(`
-    INSERT INTO admin_news (id, slug, title, excerpt, content, category, image_url, published_at, featured)
-    VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
-    RETURNING id, slug, title, excerpt, content, category, image_url, published_at, featured
-  `, [id, v.data.slug, v.data.title, v.data.excerpt, v.data.content, v.data.category, v.data.imageUrl, publishedAt, v.data.featured]);
+    INSERT INTO admin_news (id, slug, title, excerpt, content, category, image_url, published_at, featured, popup)
+    VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
+    RETURNING id, slug, title, excerpt, content, category, image_url, published_at, featured, popup
+  `, [id, v.data.slug, v.data.title, v.data.excerpt, v.data.content, v.data.category, v.data.imageUrl, publishedAt, v.data.featured, v.data.popup]);
   const newItem = rowToNews(result.rows[0]);
   req.log?.info({ event: "news_published", recordId: newItem.id }, "News published");
   res.status(201).json(newItem);
@@ -144,10 +148,10 @@ router.put("/news/:id", requireAdminAuth, async (req, res) => {
   await ensurePublishingTables();
   const result = await pool.query<NewsRow>(`
     UPDATE admin_news
-    SET slug = $2, title = $3, excerpt = $4, content = $5, category = $6, image_url = $7, featured = $8
+    SET slug = $2, title = $3, excerpt = $4, content = $5, category = $6, image_url = $7, featured = $8, popup = $9
     WHERE id = $1
-    RETURNING id, slug, title, excerpt, content, category, image_url, published_at, featured
-  `, [id, v.data.slug, v.data.title, v.data.excerpt, v.data.content, v.data.category, v.data.imageUrl, v.data.featured]);
+    RETURNING id, slug, title, excerpt, content, category, image_url, published_at, featured, popup
+  `, [id, v.data.slug, v.data.title, v.data.excerpt, v.data.content, v.data.category, v.data.imageUrl, v.data.featured, v.data.popup]);
   if (!result.rows[0]) { res.status(404).json({ error: "Lajmi nuk u gjet." }); return; }
 
   const updated = rowToNews(result.rows[0]);

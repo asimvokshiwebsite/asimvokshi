@@ -29,6 +29,7 @@ export function ensurePublishingTables(): Promise<void> {
         published_at TIMESTAMPTZ NOT NULL,
         featured BOOLEAN NOT NULL DEFAULT FALSE
       );
+      ALTER TABLE admin_news ADD COLUMN IF NOT EXISTS popup BOOLEAN NOT NULL DEFAULT FALSE;
       CREATE INDEX IF NOT EXISTS admin_news_published_at_idx ON admin_news (published_at DESC);
 
       CREATE TABLE IF NOT EXISTS admin_events (

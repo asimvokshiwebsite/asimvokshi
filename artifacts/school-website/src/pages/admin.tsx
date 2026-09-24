@@ -16,6 +16,7 @@ interface NewsItem {
   imageUrl?: string | null;
   publishedAt: string;
   featured?: boolean | null;
+  popup?: boolean | null;
 }
 
 interface CalendarEvent {
@@ -41,7 +42,7 @@ const EVENT_TYPES = [
 const PERIODS = ["Periudha e Parë", "Periudha e Dytë", "Periudha e Tretë"];
 
 const emptyNews = (): Partial<NewsItem> => ({
-  title: "", slug: "", excerpt: "", content: "", category: "Aktivitete", imageUrl: "", featured: false,
+  title: "", slug: "", excerpt: "", content: "", category: "Aktivitete", imageUrl: "", featured: false, popup: false,
 });
 const emptyEvent = (): Partial<CalendarEvent> => ({
   date: "", month: "", title: "", desc: "", time: "", location: "",
@@ -305,6 +306,7 @@ function NewsSection() {
               </div>
             </div>
             <Toggle label="Lajm i Spikatur (Featured)" checked={!!f.featured} onChange={set("featured")} />
+            <Toggle label="Shfaq si lajm i madh (Popup)" checked={!!f.popup} onChange={set("popup")} />
             <div className="flex gap-3 pt-2">
               <button onClick={save} disabled={saving}
                 className="flex items-center gap-2 px-5 py-2 bg-amber-400 hover:bg-amber-300 disabled:opacity-50 text-black text-sm font-bold rounded-xl transition-colors">
