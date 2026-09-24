@@ -149,7 +149,7 @@ export default function About() {
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
             <AnimateOnView>
               <div className="relative rounded-2xl overflow-hidden border border-white/5 shadow-2xl">
-                <img src={SCHOOL_IMAGES.teachers_historical} alt="Asim Vokshi Historik" className="w-full h-[400px] object-cover" />
+                <img src={SCHOOL_IMAGES.asim_vokshi_portrait} alt="Portret historik i Asim Vokshit" className="w-full h-[500px] object-contain bg-[#07111F]" />
                 <div className="absolute inset-0 bg-gradient-to-t from-[#04090F] via-transparent to-transparent" />
               </div>
             </AnimateOnView>

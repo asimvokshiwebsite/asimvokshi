@@ -5,6 +5,7 @@ export const SCHOOL_IMAGES = {
   // Main building, classes, inaugurations, students
   building_front: "/images/building_front.jpeg",
   asim_vokshi_facade: "/images/asim_vokshi_facade.jpeg",
+  asim_vokshi_portrait: "/images/asim_vokshi_portrait.png",
   class_interactive: "/images/class_interactive.jpeg",
   students_group1: "/images/students_group1.jpeg",
   students_group2: "/images/students_group2.jpeg",
