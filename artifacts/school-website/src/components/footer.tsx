@@ -122,7 +122,7 @@ export function Footer() {
         {/* Bottom Strip */}
         <div className="mt-16 pt-8 border-t border-white/5 flex flex-col sm:flex-row justify-between items-center gap-4 text-center sm:text-left">
           <p className="text-white/40 text-xs">
-            © 2026 SMOGJ "Asim Vokshi". Dizanjuar dhe zhvilluar nga <a href="https://www.instagram.com/benardd.exe/" target="_blank" rel="noopener noreferrer" className="text-crimson hover:text-amber-400 font-semibold transition-colors duration-300">Benard Pernezha</a>
+            © 2026 SMOGJ "Asim Vokshi". Dizajnuar dhe zhvilluar nga <a href="https://www.instagram.com/benardd.exe/" target="_blank" rel="noopener noreferrer" className="text-crimson hover:text-amber-400 font-semibold transition-colors duration-300">Benard Pernezha</a>
           </p>
           <div className="flex items-center gap-3 text-white/30 text-xs">
             <span>ZVA Tiranë</span>

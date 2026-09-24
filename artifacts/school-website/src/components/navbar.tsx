@@ -252,6 +252,9 @@ export function Navbar() {
           <div className="flex md:hidden items-center gap-3">
             <motion.button
               onClick={() => setMobileOpen(!mobileOpen)}
+              aria-label={mobileOpen ? "Mbyll menunë" : "Hap menunë"}
+              aria-expanded={mobileOpen}
+              aria-controls="mobile-navigation"
               whileHover={{ scale: 1.1 }}
               whileTap={{ scale: 0.9 }}
               className="p-3 rounded-xl glass-premium text-white cursor-pointer min-h-11 min-w-11 flex items-center justify-center"
@@ -265,13 +268,24 @@ export function Navbar() {
       <AnimatePresence>
         {mobileOpen && (
           <motion.div
+            id="mobile-navigation"
             initial={{ opacity: 0, height: 0 }}
             animate={{ opacity: 1, height: "auto" }}
             exit={{ opacity: 0, height: 0 }}
             transition={{ duration: 0.3, ease: "easeInOut" }}
-            className="md:hidden glass-frosted border-b border-white/5 overflow-hidden"
+            className="md:hidden glass-frosted border-b border-white/5 max-h-[calc(100dvh-5rem)] overflow-y-auto"
           >
             <div className="px-4 pt-3 pb-7 space-y-5">
+              <Link href="/">
+                <motion.div
+                  className={`px-4 py-3 rounded-xl text-sm font-bold cursor-pointer transition-colors min-h-11 flex items-center ${
+                    location === "/" ? "bg-crimson/10 text-amber-400" : "text-white/60 hover:text-white"
+                  }`}
+                  whileHover={{ x: 4 }}
+                >
+                  Kryefaqja
+                </motion.div>
+              </Link>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 {/* Mobile: Shkolla Links */}
                 <div className="space-y-2">

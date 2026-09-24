@@ -130,7 +130,7 @@ export default function Home() {
   return (
     <PageTransition>
       {/* HERO SECTION WITH ACTUAL SCHOOL PHOTO BACKGROUND */}
-      <section ref={heroRef} className="relative h-screen min-h-[750px] flex items-center overflow-hidden bg-[#04090F]">
+      <section ref={heroRef} className="relative h-[100svh] min-h-[680px] sm:min-h-[750px] flex items-center overflow-hidden bg-[#04090F]">
         {/* Parallax background image (Actual front of school) */}
         <motion.div
           className="absolute inset-0"
@@ -189,7 +189,7 @@ export default function Home() {
             </p>
 
             {/* Typography Reveal */}
-            <h1 className="font-bold text-white mb-6 leading-none tracking-tight" style={{ fontSize: "clamp(3.5rem, 8vw, 7rem)" }}>
+            <h1 className="font-bold text-white mb-6 leading-none tracking-tight" style={{ fontSize: "clamp(3rem, 15vw, 7rem)" }}>
               Asim Vokshi
             </h1>
 
@@ -342,7 +342,7 @@ export default function Home() {
               <span className="text-crimson text-xs uppercase tracking-widest font-bold mb-3 inline-block">Mundësitë Tona</span>
               <h2 className="text-4xl sm:text-5xl font-bold text-white mb-4">Zbulo Shkollën</h2>
               <p className="text-white/50 text-sm sm:text-base max-w-xl mx-auto leading-relaxed">
-                Gjithçka që duhet të dini për shkollen tonë, mjediset bashkëkohore dhe programet akademike.
+                Gjithçka që duhet të dini për shkollën tonë, mjediset bashkëkohore dhe programet akademike.
               </p>
             </div>
           </AnimateOnView>

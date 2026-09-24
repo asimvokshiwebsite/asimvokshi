@@ -30,7 +30,7 @@ const facilities = [
   { icon: "🔬", title: "Laborator Bio-Kimie", desc: "Laborator i rikonstruktuar me pajisje bashkëkohore për eksperimente shkencore cilësore." },
   { icon: "📚", title: "Biblioteka Shkollore", desc: "Një mjedis i qetë me fond të pasur librash për studim dhe kërkim shkencor." },
   { icon: "⚽", title: "Mjedise Sportive", desc: "Palestër e brendshme dhe terrene sportive të jashtme për zhvillimin e edukimit fizik." },
-  { icon: "🔒", title: "Oficere Sigurie", desc: "Shërbim i dedikuar sigurie (Slementina Musabelliu) për të garantuar mbrojtjen dhe qetësinë në shkollë." }
+  { icon: "🔒", title: "Oficere e Sigurisë", desc: "Shërbim i dedikuar sigurie (Slementina Musabelliu) për të garantuar mbrojtjen dhe qetësinë në shkollë." }
 ];
 
 const partners = ["Ambasada Franceze", "Ambasada Italiane", "Ambasada Gjermane", "Ambasada Spanjolle", "Ambasada Turke", "Bashkimi Europian (BE)", "UNDP / EU4Schools"];

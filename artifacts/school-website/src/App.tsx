@@ -66,8 +66,8 @@ function BigNewsPopup() {
   if (!open || !item) return null;
 
   return (
-    <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/75 px-4 py-8 backdrop-blur-sm" role="dialog" aria-modal="true" aria-labelledby="big-news-popup-title">
-      <div className="relative w-full max-w-2xl overflow-hidden rounded-3xl border border-amber-400/30 bg-[#07111F] shadow-2xl shadow-black/60">
+    <div className="fixed inset-0 z-[100] flex items-center justify-center overflow-y-auto bg-black/75 px-4 py-4 sm:py-8 backdrop-blur-sm" role="dialog" aria-modal="true" aria-labelledby="big-news-popup-title">
+      <div className="relative my-auto max-h-[calc(100dvh-2rem)] w-full max-w-2xl overflow-y-auto rounded-3xl border border-amber-400/30 bg-[#07111F] shadow-2xl shadow-black/60 sm:max-h-[calc(100dvh-4rem)]">
         <button
           type="button"
           onClick={() => setOpen(false)}
@@ -76,8 +76,8 @@ function BigNewsPopup() {
         >
           <X size={18} />
         </button>
-        {item.imageUrl && <img src={item.imageUrl} alt="" className="h-48 w-full object-cover sm:h-64" />}
-        <div className="space-y-4 p-6 sm:p-8">
+        {item.imageUrl && <img src={item.imageUrl} alt="" className="h-40 w-full object-cover sm:h-64" />}
+        <div className="space-y-4 p-5 sm:p-8">
           <p className="text-xs font-bold uppercase tracking-[0.2em] text-amber-400">Lajm i rëndësishëm</p>
           <h2 id="big-news-popup-title" className="font-serif text-2xl font-bold leading-tight text-white sm:text-3xl">{item.title}</h2>
           {item.excerpt && <p className="text-sm leading-relaxed text-white/65 sm:text-base">{item.excerpt}</p>}

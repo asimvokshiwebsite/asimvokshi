@@ -26,6 +26,8 @@ export interface NewsListParams {
   limit?: number;
 }
 
+type GetNewsParams = NewsListParams;
+
 export interface NewsListResponse {
   items: NewsItem[];
   total: number;
@@ -48,6 +50,8 @@ export interface StaffListParams {
   search?: string;
   department?: string;
 }
+
+type GetStaffParams = StaffListParams;
 
 export interface StaffListResponse {
   items: StaffMember[];
