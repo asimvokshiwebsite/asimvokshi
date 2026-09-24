@@ -391,7 +391,7 @@ export default function Home() {
                 <TiltCard maxTilt={8} className="h-[380px] border border-white/10 shadow-2xl rounded-3xl overflow-hidden group">
                   <div className="relative w-full h-full p-8 flex flex-col justify-between cursor-pointer text-white">
                     {/* Actual School Photo Background */}
-                    <div className="absolute inset-0 bg-cover bg-center scale-100 group-hover:scale-105 transition-transform duration-700 ease-out" style={{ backgroundImage: `url('${SCHOOL_IMAGES.class_interactive}')` }} />
+                    <div className="absolute inset-0 bg-cover bg-center scale-100 group-hover:scale-105 transition-transform duration-700 ease-out" style={{ backgroundImage: `url('${SCHOOL_IMAGES.asim_vokshi_facade}')` }} />
                     <div className="absolute inset-0 bg-gradient-to-t from-[#04090F] via-[#04090F]/75 to-[#04090F]/45 transition-colors duration-500 group-hover:via-[#04090F]/65" />
                     
                     {/* Neon hover border glow effect */}
