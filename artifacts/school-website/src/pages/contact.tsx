@@ -22,65 +22,6 @@ export default function Contact() {
   // 41°19'08.29"N 19°49'40.71"E → 41.3189694444, 19.8279750000
   const mapCenter = { lat: 41.3189694444, lng: 19.827975 };
 
-  const handleMapReady = (map: google.maps.Map) => {
-    // Create a custom dark mode style for the map
-    const darkMapStyle = [
-      { elementType: "geometry", stylers: [{ color: "#04090f" }] },
-      { elementType: "labels.text.stroke", stylers: [{ color: "#04090f" }] },
-      { elementType: "labels.text.fill", stylers: [{ color: "#ffffff" }, { opacity: 0.6 }] },
-      {
-        featureType: "administrative.locality",
-        elementType: "labels.text.fill",
-        stylers: [{ color: "#f59e0b" }],
-      },
-      {
-        featureType: "poi",
-        elementType: "labels.text.fill",
-        stylers: [{ color: "#ffffff" }, { opacity: 0.4 }],
-      },
-      {
-        featureType: "poi.park",
-        elementType: "geometry",
-        stylers: [{ color: "#07111f" }],
-      },
-      {
-        featureType: "road",
-        elementType: "geometry",
-        stylers: [{ color: "#0d1b2a" }],
-      },
-      {
-        featureType: "road",
-        elementType: "geometry.stroke",
-        stylers: [{ color: "#1b263b" }],
-      },
-      {
-        featureType: "road",
-        elementType: "labels.text.fill",
-        stylers: [{ color: "#ffffff" }, { opacity: 0.5 }],
-      },
-      {
-        featureType: "road.highway",
-        elementType: "geometry",
-        stylers: [{ color: "#c8102e" }, { opacity: 0.2 }],
-      },
-      {
-        featureType: "water",
-        elementType: "geometry",
-        stylers: [{ color: "#000814" }],
-      },
-    ];
-
-    map.setOptions({ styles: darkMapStyle });
-
-    // Add a custom glowing marker for the school
-    new window.google.maps.Marker({
-      position: mapCenter,
-      map: map,
-      title: "Shkolla e Mesme me Orientim Gjuhësor 'Asim Vokshi'",
-      animation: window.google.maps.Animation.DROP,
-    });
-  };
-
   return (
     <PageTransition>
       {/* Hero Section */}
@@ -184,7 +125,6 @@ export default function Contact() {
                 className="w-full h-full"
                 initialCenter={mapCenter}
                 initialZoom={15}
-                onMapReady={handleMapReady}
               />
               <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-[#04090F] to-transparent h-20 pointer-events-none opacity-50" />
             </div>
