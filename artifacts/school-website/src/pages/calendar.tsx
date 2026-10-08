@@ -18,6 +18,7 @@ interface CalendarEvent {
   type: EventType;
   highlight?: boolean;
   period?: string;
+  imageUrl?: string | null;
 }
 
 const typeConfig: Record<EventType, { color: string; label: string }> = {
@@ -58,6 +59,15 @@ function EventCard({ event }: { event: CalendarEvent }) {
         </div>
         <h3 className="font-serif font-bold text-white text-lg leading-snug">{event.title}</h3>
         <p className="text-white/50 text-sm leading-relaxed">{event.desc}</p>
+        {event.imageUrl && (
+          <img
+            src={event.imageUrl}
+            alt={event.title}
+            loading="lazy"
+            decoding="async"
+            className="max-h-80 w-full rounded-xl border border-white/10 object-cover"
+          />
+        )}
         <div className="flex flex-wrap gap-4 text-xs text-white/30 pt-1">
           {event.time && (
             <span className="flex items-center gap-1">

@@ -57,6 +57,7 @@ export function ensurePublishingTables(): Promise<void> {
         highlight BOOLEAN NOT NULL DEFAULT FALSE,
         period TEXT NOT NULL
       );
+      ALTER TABLE admin_events ADD COLUMN IF NOT EXISTS image_url TEXT;
       CREATE INDEX IF NOT EXISTS admin_events_period_idx ON admin_events (period);
     `)
     .then(() => undefined);

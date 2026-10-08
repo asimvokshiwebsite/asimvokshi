@@ -1,6 +1,7 @@
 import { Router } from "express";
 import { ensurePublishingTables, pool } from "@workspace/db";
 import { requireAdminAuth } from "./admin-auth";
+import { isSafeImageUrl } from "../lib/image-validation";
 
 const router = Router();
 const VALID_TYPES = ["akademike", "kulturore", "nderkombetare", "shkollore"] as const;
@@ -17,6 +18,7 @@ type EventItem = {
   type: "akademike" | "kulturore" | "nderkombetare" | "shkollore";
   highlight: boolean;
   period: string;
+  imageUrl?: string | null;
 };
 
 type EventRow = {
@@ -30,6 +32,7 @@ type EventRow = {
   type: EventItem["type"];
   highlight: boolean;
   period: string;
+  image_url: string | null;
 };
 
 function rowToEvent(row: EventRow): EventItem {
@@ -44,13 +47,14 @@ function rowToEvent(row: EventRow): EventItem {
     type: row.type,
     highlight: row.highlight,
     period: row.period,
+    ...(row.image_url ? { imageUrl: row.image_url } : {}),
   };
 }
 
 async function readEvents(): Promise<EventItem[]> {
   await ensurePublishingTables();
   const result = await pool.query<EventRow>(`
-    SELECT id, date, month, title, description, time, location, type, highlight, period
+    SELECT id, date, month, title, description, time, location, type, highlight, period, image_url
     FROM admin_events
     ORDER BY id ASC
   `);
@@ -79,11 +83,15 @@ function validateEventBody(body: any): EventValidation {
   const type = VALID_TYPES.includes(body.type) ? body.type : "shkollore";
   const period = VALID_PERIODS.includes(body.period) ? body.period : "Periudha e Parë";
   const highlight = Boolean(body.highlight);
+  const imageUrl = typeof body.imageUrl === "string" ? body.imageUrl.trim() : "";
 
   if (!title) return { ok: false, error: "Titulli është i detyrueshëm." };
   if (!desc) return { ok: false, error: "Përshkrimi është i detyrueshëm." };
+  if (imageUrl.length > 5_592_500 || (imageUrl && !isSafeImageUrl(imageUrl))) {
+    return { ok: false, error: "Zgjidhni një fotografi të vlefshme deri në 4 MB ose përdorni HTTPS." };
+  }
 
-  return { ok: true, data: { title, desc, date, month, time: time || undefined, location: location || undefined, type, period, highlight } };
+  return { ok: true, data: { title, desc, date, month, time: time || undefined, location: location || undefined, type, period, highlight, imageUrl: imageUrl || null } };
 }
 
 router.get("/events", async (_req, res) => {
@@ -98,10 +106,10 @@ router.post("/events", requireAdminAuth, async (req, res) => {
   await ensurePublishingTables();
   const id = Date.now();
   const result = await pool.query<EventRow>(`
-    INSERT INTO admin_events (id, date, month, title, description, time, location, type, highlight, period)
-    VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
-    RETURNING id, date, month, title, description, time, location, type, highlight, period
-  `, [id, v.data.date, v.data.month, v.data.title, v.data.desc, v.data.time ?? null, v.data.location ?? null, v.data.type, v.data.highlight, v.data.period]);
+    INSERT INTO admin_events (id, date, month, title, description, time, location, type, highlight, period, image_url)
+    VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)
+    RETURNING id, date, month, title, description, time, location, type, highlight, period, image_url
+  `, [id, v.data.date, v.data.month, v.data.title, v.data.desc, v.data.time ?? null, v.data.location ?? null, v.data.type, v.data.highlight, v.data.period, v.data.imageUrl ?? null]);
   const newItem = rowToEvent(result.rows[0]);
   req.log?.info({ event: "calendar_event_published", recordId: newItem.id }, "Calendar event published");
   res.status(201).json(newItem);
@@ -117,10 +125,10 @@ router.put("/events/:id", requireAdminAuth, async (req, res) => {
   await ensurePublishingTables();
   const result = await pool.query<EventRow>(`
     UPDATE admin_events
-    SET date = $2, month = $3, title = $4, description = $5, time = $6, location = $7, type = $8, highlight = $9, period = $10
+    SET date = $2, month = $3, title = $4, description = $5, time = $6, location = $7, type = $8, highlight = $9, period = $10, image_url = $11
     WHERE id = $1
-    RETURNING id, date, month, title, description, time, location, type, highlight, period
-  `, [id, v.data.date, v.data.month, v.data.title, v.data.desc, v.data.time ?? null, v.data.location ?? null, v.data.type, v.data.highlight, v.data.period]);
+    RETURNING id, date, month, title, description, time, location, type, highlight, period, image_url
+  `, [id, v.data.date, v.data.month, v.data.title, v.data.desc, v.data.time ?? null, v.data.location ?? null, v.data.type, v.data.highlight, v.data.period, v.data.imageUrl ?? null]);
   if (!result.rows[0]) { res.status(404).json({ error: "Aktiviteti nuk u gjet." }); return; }
 
   const updated = rowToEvent(result.rows[0]);

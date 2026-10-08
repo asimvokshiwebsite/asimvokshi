@@ -1,6 +1,7 @@
 import { Router } from "express";
 import { ensurePublishingTables, pool } from "@workspace/db";
 import { requireAdminAuth } from "./admin-auth";
+import { isSafeImageUrl } from "../lib/image-validation";
 
 const router = Router();
 
@@ -100,7 +101,7 @@ function validateNewsBody(body: any): NewsValidation {
   const excerpt = sanitizeString(body.excerpt, 500);
   const content = sanitizeString(body.content, 20000);
   const category = sanitizeString(body.category, 60);
-  const imageUrl = sanitizeString(body.imageUrl ?? "", 5_500_000);
+  const imageUrl = typeof body.imageUrl === "string" ? body.imageUrl.trim() : "";
   const featured = Boolean(body.featured);
   const popup = Boolean(body.popup);
   const duration: NewsDuration = body.duration === "6h" || body.duration === "24h" || body.duration === "3d" || body.duration === "1w"
@@ -109,7 +110,7 @@ function validateNewsBody(body: any): NewsValidation {
 
   if (!title) return { ok: false, error: "Titulli është i detyrueshëm." };
   if (!content) return { ok: false, error: "Përmbajtja është e detyrueshme." };
-  if (imageUrl && !isSafeImageUrl(imageUrl)) {
+  if (imageUrl.length > 5_592_500 || (imageUrl && !isSafeImageUrl(imageUrl))) {
     return { ok: false, error: "Përdorni një foto lokale ose një adresë HTTPS." };
   }
 
@@ -128,21 +129,6 @@ function validateNewsBody(body: any): NewsValidation {
       expiresAt: null,
     },
   };
-}
-
-function isSafeImageUrl(value: string): boolean {
-  if (value.startsWith("data:image/")) {
-    return /^data:image\/(?:jpeg|png|webp|gif);base64,[A-Za-z0-9+/]+={0,2}$/.test(value) && value.length <= 5_500_000;
-  }
-  if (value.startsWith("/images/")) {
-    return !value.includes("..") && !value.includes("\\") && !value.includes("\0");
-  }
-  try {
-    const url = new URL(value);
-    return url.protocol === "https:" && !url.username && !url.password;
-  } catch {
-    return false;
-  }
 }
 
 router.get("/news", async (_req, res) => {

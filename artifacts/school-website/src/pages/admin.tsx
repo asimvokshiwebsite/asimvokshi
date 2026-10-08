@@ -32,6 +32,7 @@ interface CalendarEvent {
   type: "akademike" | "kulturore" | "nderkombetare" | "shkollore";
   highlight?: boolean;
   period: string;
+  imageUrl?: string | null;
 }
 
 const NEWS_CATEGORIES = ["Aktivitete", "Infrastrukturë", "Akademike", "Kulturore", "Ndërkombëtare", "Njoftim"];
@@ -54,7 +55,7 @@ const emptyNews = (): Partial<NewsItem> => ({
 });
 const emptyEvent = (): Partial<CalendarEvent> => ({
   date: "", month: "", title: "", desc: "", time: "", location: "",
-  type: "shkollore", highlight: false, period: "Periudha e Parë",
+  type: "shkollore", highlight: false, period: "Periudha e Parë", imageUrl: "",
 });
 
 function slugify(s: string) {
@@ -248,7 +249,7 @@ function NewsSection() {
       setNotice({ kind: "error", text: "Zgjidhni një fotografi JPG, PNG, WebP ose GIF." });
       return;
     }
-    if (file.size > MAX_IMAGE_UPLOAD_BYTES) {
+    if (file.size === 0 || file.size > MAX_IMAGE_UPLOAD_BYTES) {
       setNotice({ kind: "error", text: "Fotografia duhet të jetë më e vogël se 4 MB." });
       return;
     }
@@ -302,8 +303,12 @@ function NewsSection() {
                   className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-2.5 text-white text-sm file:mr-3 file:rounded-lg file:border-0 file:bg-amber-400 file:px-3 file:py-1.5 file:text-xs file:font-bold file:text-black hover:file:bg-amber-300"
                 />
                 <p className="text-[11px] text-white/35">Zgjidhni nga fotot ose skedarët në iPhone, Android, Windows ose Mac. Maksimumi 4 MB.</p>
-                {typeof f.imageUrl === "string" && f.imageUrl.startsWith("data:image/") && (
-                  <p className="text-xs text-emerald-400">Fotografia e pajisjes është gati për publikim.</p>
+                {f.imageUrl && (
+                  <div className="flex items-center gap-3 rounded-xl border border-white/10 bg-white/5 p-2">
+                    <img src={f.imageUrl} alt="Parapamje e fotografisë së lajmit" className="h-16 w-20 rounded-lg object-cover" />
+                    <p className="min-w-0 flex-1 text-xs text-emerald-400">Fotografia është gati për publikim.</p>
+                    <button type="button" onClick={() => set("imageUrl")("")} className="rounded-lg p-2 text-white/50 hover:bg-white/10 hover:text-white" aria-label="Hiq fotografinë"><X size={14} /></button>
+                  </div>
                 )}
                 <Input
                   label="Ose URL e fotografisë"
@@ -498,6 +503,24 @@ function EventsSection() {
 
   const f = editing ?? {};
   const set = (k: keyof CalendarEvent) => (v: any) => setEditing(prev => ({ ...prev, [k]: v }));
+  async function chooseImage(file: File | undefined) {
+    if (!file) return;
+    if (!["image/jpeg", "image/png", "image/webp", "image/gif"].includes(file.type)) {
+      setNotice({ kind: "error", text: "Zgjidhni një fotografi JPG, PNG, WebP ose GIF." });
+      return;
+    }
+    if (file.size === 0 || file.size > MAX_IMAGE_UPLOAD_BYTES) {
+      setNotice({ kind: "error", text: "Fotografia duhet të jetë më e vogël se 4 MB." });
+      return;
+    }
+    try {
+      const dataUrl = await readImageFile(file);
+      setEditing(prev => ({ ...prev, imageUrl: dataUrl }));
+      setNotice({ kind: "success", text: `Fotografia “${file.name}” u zgjodh.` });
+    } catch (error) {
+      setNotice({ kind: "error", text: error instanceof Error ? error.message : "Fotografia nuk mund të lexohet." });
+    }
+  }
 
   const typeColors: Record<string, string> = {
     akademike: "text-blue-400", kulturore: "text-red-400",
@@ -541,6 +564,27 @@ function EventsSection() {
                 <Toggle label="Ngjarje Kryesore" checked={!!f.highlight} onChange={set("highlight")} />
               </div>
             </div>
+            <div className="space-y-2">
+              <label htmlFor="admin-event-image-file" className="text-xs font-bold uppercase tracking-wider text-white/50">Fotografia nga pajisja</label>
+              <input
+                id="admin-event-image-file"
+                type="file"
+                accept="image/jpeg,image/png,image/webp,image/gif"
+                onChange={e => {
+                  void chooseImage(e.target.files?.[0]);
+                  e.currentTarget.value = "";
+                }}
+                className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-2.5 text-white text-sm file:mr-3 file:rounded-lg file:border-0 file:bg-amber-400 file:px-3 file:py-1.5 file:text-xs file:font-bold file:text-black hover:file:bg-amber-300"
+              />
+              <p className="text-[11px] text-white/35">Zgjidhni JPG, PNG, WebP ose GIF nga pajisja juaj. Maksimumi 4 MB.</p>
+              {f.imageUrl && (
+                <div className="flex items-center gap-3 rounded-xl border border-white/10 bg-white/5 p-2">
+                  <img src={f.imageUrl} alt="Parapamje e fotografisë së aktivitetit" className="h-16 w-20 rounded-lg object-cover" />
+                  <p className="min-w-0 flex-1 text-xs text-emerald-400">Fotografia është gati për publikim.</p>
+                  <button type="button" onClick={() => set("imageUrl")("")} className="rounded-lg p-2 text-white/50 hover:bg-white/10 hover:text-white" aria-label="Hiq fotografinë"><X size={14} /></button>
+                </div>
+              )}
+            </div>
             <div className="flex gap-3 pt-2">
               <button onClick={save} disabled={saving}
                 className="flex items-center gap-2 px-5 py-2 bg-amber-400 hover:bg-amber-300 disabled:opacity-50 text-black text-sm font-bold rounded-xl transition-colors">
@@ -563,6 +607,7 @@ function EventsSection() {
           {items.map(item => (
             <motion.div key={item.id} layout
               className="flex items-center gap-4 bg-[#07111F]/60 border border-white/5 rounded-xl px-4 py-3 hover:border-white/10 transition-colors">
+              {item.imageUrl && <img src={item.imageUrl} alt="" className="h-12 w-12 flex-shrink-0 rounded-lg object-cover" />}
               <div className="flex-shrink-0 flex flex-col items-center justify-center w-12 h-12 rounded-xl bg-white/5 border border-white/10 text-center">
                 <span className="text-sm font-bold text-white leading-none">{item.date}</span>
                 <span className="text-[9px] uppercase tracking-wide text-amber-400 font-bold">{item.month}</span>
